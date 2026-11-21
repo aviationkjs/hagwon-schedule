@@ -24,7 +24,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx vitest run
       - run: npm run build
         env:
           # 저장소 Settings → Secrets and variables → Actions → Variables 에 등록
@@ -34,6 +33,8 @@ jobs:
           VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
           VITE_ACADEMY_ID: main
+      # 빌드 결과(manifest·서비스 워커)를 검사하는 테스트가 있어 빌드 다음에 돈다.
+      - run: npx vitest run
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
