@@ -1,0 +1,1059 @@
+{
+ "name": "Astryx",
+ "version": 1,
+ "color": {
+  "themes": [
+   {
+    "id": "light",
+    "name": "Light"
+   },
+   {
+    "id": "dark",
+    "name": "Dark"
+   }
+  ],
+  "tokens": [
+   {
+    "name": "color-background-surface",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#262626"
+    },
+    "usage": "Raised surfaces: panels, toolbars, the layer a person works on."
+   },
+   {
+    "name": "color-background-body",
+    "value": {
+     "light": "#f1f1f1",
+     "dark": "#1b1b1b"
+    },
+    "usage": "The page canvas behind everything."
+   },
+   {
+    "name": "color-background-card",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#1b1b1b"
+    },
+    "usage": "Card fill; pair with color-border for the edge."
+   },
+   {
+    "name": "color-background-popover",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#1b1b1b"
+    },
+    "usage": "Popovers, menus, tooltips and dialogs."
+   },
+   {
+    "name": "color-background-muted",
+    "value": {
+     "light": "#f1f1f1",
+     "dark": "#1b1b1b"
+    },
+    "usage": "Recessed fills: tracks, code blocks, quiet wells."
+   },
+   {
+    "name": "color-accent",
+    "value": {
+     "light": "#1b1b1b",
+     "dark": "#f1f1f1"
+    },
+    "usage": "The one primary emphasis: primary buttons, selected controls, the focus ring. Near-black in light, near-white in dark: Neutral is grayscale-first."
+   },
+   {
+    "name": "color-accent-muted",
+    "value": {
+     "light": "#d4d4d4",
+     "dark": "#474747"
+    },
+    "usage": "Soft accent fill: selected rows, secondary emphasis."
+   },
+   {
+    "name": "color-neutral",
+    "value": {
+     "light": "#0000000f",
+     "dark": "#ffffff1a"
+    },
+    "usage": "Translucent neutral fill for secondary buttons and chips; lets the surface show through."
+   },
+   {
+    "name": "color-overlay",
+    "value": {
+     "light": "#00000080",
+     "dark": "#000000cc"
+    },
+    "usage": "Modal and drawer scrim."
+   },
+   {
+    "name": "color-overlay-hover",
+    "value": {
+     "light": "#0000000d",
+     "dark": "#ffffff0d"
+    },
+    "usage": "Hover tint laid over any surface."
+   },
+   {
+    "name": "color-overlay-pressed",
+    "value": {
+     "light": "#0000001a",
+     "dark": "#ffffff1a"
+    },
+    "usage": "Pressed tint laid over any surface."
+   },
+   {
+    "name": "color-text-primary",
+    "value": {
+     "light": "#000000",
+     "dark": "#ffffff"
+    },
+    "usage": "Body copy and headings on every background-* surface."
+   },
+   {
+    "name": "color-text-secondary",
+    "value": {
+     "light": "#474747",
+     "dark": "#9e9e9e"
+    },
+    "usage": "Supporting text, descriptions and metadata on surface, body and card."
+   },
+   {
+    "name": "color-text-disabled",
+    "value": {
+     "light": "#919191",
+     "dark": "#525252"
+    },
+    "usage": "Disabled labels only; intentionally below 4.5:1, never for readable content."
+   },
+   {
+    "name": "color-text-accent",
+    "value": {
+     "light": "#1b1b1b",
+     "dark": "#f1f1f1"
+    },
+    "usage": "Text in the accent role."
+   },
+   {
+    "name": "color-on-dark",
+    "value": "#ffffff",
+    "usage": "Text and icons placed on dark media or imagery."
+   },
+   {
+    "name": "color-on-light",
+    "value": "#111111",
+    "usage": "Text and icons placed on light media or imagery."
+   },
+   {
+    "name": "color-on-accent",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#111111"
+    },
+    "usage": "Text and icons on a color-accent fill."
+   },
+   {
+    "name": "color-on-success",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#111111"
+    },
+    "usage": "Text on a color-success fill."
+   },
+   {
+    "name": "color-on-error",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#111111"
+    },
+    "usage": "Text on a color-error fill."
+   },
+   {
+    "name": "color-on-warning",
+    "value": "#111111",
+    "usage": "Text on a color-warning fill (dark in both modes)."
+   },
+   {
+    "name": "color-info",
+    "value": {
+     "light": "#0074e2",
+     "dark": "#6d9cfe"
+    },
+    "usage": "Strong info status fill."
+   },
+   {
+    "name": "color-info-muted",
+    "value": {
+     "light": "#b9d7ff",
+     "dark": "#88bcff3d"
+    },
+    "usage": "Soft info background (banners, toasts)."
+   },
+   {
+    "name": "color-on-info",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#111111"
+    },
+    "usage": "Text on a color-info fill."
+   },
+   {
+    "name": "color-text-info",
+    "value": {
+     "light": "#0067ce",
+     "dark": "#a1caff"
+    },
+    "usage": "Info status text on surface and body."
+   },
+   {
+    "name": "color-text-success",
+    "value": {
+     "light": "#2f7d33",
+     "dark": "#90ca90"
+    },
+    "usage": "Success status text on surface and body."
+   },
+   {
+    "name": "color-text-warning",
+    "value": {
+     "light": "#836700",
+     "dark": "#eec448"
+    },
+    "usage": "Warning status text on surface and body."
+   },
+   {
+    "name": "color-text-error",
+    "value": {
+     "light": "#c0262c",
+     "dark": "#ffaea7"
+    },
+    "usage": "Error and validation text on surface and body."
+   },
+   {
+    "name": "color-on-info-muted",
+    "value": {
+     "light": "#003978",
+     "dark": "#a1caff"
+    },
+    "usage": "Text on color-info-muted."
+   },
+   {
+    "name": "color-on-success-muted",
+    "value": {
+     "light": "#00490b",
+     "dark": "#90ca90"
+    },
+    "usage": "Text on color-success-muted."
+   },
+   {
+    "name": "color-on-warning-muted",
+    "value": {
+     "light": "#4b3900",
+     "dark": "#eec448"
+    },
+    "usage": "Text on color-warning-muted."
+   },
+   {
+    "name": "color-on-error-muted",
+    "value": {
+     "light": "#76000c",
+     "dark": "#ffaea7"
+    },
+    "usage": "Text on color-error-muted; also the destructive button label in Neutral."
+   },
+   {
+    "name": "color-icon-accent",
+    "value": {
+     "light": "#1b1b1b",
+     "dark": "#f1f1f1"
+    },
+    "usage": "Icons in the accent role."
+   },
+   {
+    "name": "color-icon-primary",
+    "value": {
+     "light": "#000000",
+     "dark": "#ffffff"
+    },
+    "usage": "Default icon color, matched to primary text."
+   },
+   {
+    "name": "color-icon-secondary",
+    "value": {
+     "light": "#6a6a6a",
+     "dark": "#9e9e9e"
+    },
+    "usage": "Secondary and decorative icons."
+   },
+   {
+    "name": "color-icon-disabled",
+    "value": {
+     "light": "#919191",
+     "dark": "#525252"
+    },
+    "usage": "Icons in disabled controls."
+   },
+   {
+    "name": "color-success",
+    "value": {
+     "light": "#198100",
+     "dark": "#64af4c"
+    },
+    "usage": "Strong success status fill."
+   },
+   {
+    "name": "color-warning",
+    "value": "#ffce2f",
+    "usage": "Strong warning status fill (one yellow in both modes)."
+   },
+   {
+    "name": "color-error",
+    "value": {
+     "light": "#c9303a",
+     "dark": "#ff705d"
+    },
+    "usage": "Strong error status fill."
+   },
+   {
+    "name": "color-success-muted",
+    "value": {
+     "light": "#bce0bb",
+     "dark": "#90ca903d"
+    },
+    "usage": "Soft success background."
+   },
+   {
+    "name": "color-error-muted",
+    "value": {
+     "light": "#ffc4be",
+     "dark": "#ff98903d"
+    },
+    "usage": "Soft error background; the destructive button fill in Neutral."
+   },
+   {
+    "name": "color-warning-muted",
+    "value": {
+     "light": "#fae19e",
+     "dark": "#e2b6233d"
+    },
+    "usage": "Soft warning background."
+   },
+   {
+    "name": "color-border",
+    "value": {
+     "light": "#00000014",
+     "dark": "#ffffff1a"
+    },
+    "usage": "Default hairline: cards, dividers, input edges (translucent)."
+   },
+   {
+    "name": "color-border-emphasized",
+    "value": {
+     "light": "#d4d4d4",
+     "dark": "#525252"
+    },
+    "usage": "Stronger edge; switch and progress-bar tracks in Neutral."
+   },
+   {
+    "name": "color-skeleton",
+    "value": {
+     "light": "#f1f1f1",
+     "dark": "#525252"
+    },
+    "usage": "Skeleton loading placeholders."
+   },
+   {
+    "name": "color-shadow",
+    "value": {
+     "light": "#0000001a",
+     "dark": "#0000004d"
+    },
+    "usage": "Shadow tint for custom elevations."
+   },
+   {
+    "name": "color-tint-hover",
+    "value": {
+     "light": "#000000",
+     "dark": "#ffffff"
+    },
+    "usage": "Base color mixed into hover tints."
+   },
+   {
+    "name": "color-background-red",
+    "value": {
+     "light": "#ffc4be",
+     "dark": "#5b2b28"
+    },
+    "usage": "Badge and tag fill for the red categorical badge."
+   },
+   {
+    "name": "color-border-red",
+    "value": {
+     "light": "#ffaea7",
+     "dark": "#fa6762"
+    },
+    "usage": "Edge for the red categorical badge."
+   },
+   {
+    "name": "color-icon-red",
+    "value": {
+     "light": "#76000c",
+     "dark": "#ff9890"
+    },
+    "usage": "Icon color for the red categorical badge on color-background-red."
+   },
+   {
+    "name": "color-text-red",
+    "value": {
+     "light": "#76000c",
+     "dark": "#ffaea7"
+    },
+    "usage": "Text for the red categorical badge on color-background-red."
+   },
+   {
+    "name": "color-background-orange",
+    "value": {
+     "light": "#ffc7a1",
+     "dark": "#503424"
+    },
+    "usage": "Badge and tag fill for the orange categorical badge."
+   },
+   {
+    "name": "color-border-orange",
+    "value": {
+     "light": "#ffc7a1",
+     "dark": "#df843f"
+    },
+    "usage": "Edge for the orange categorical badge."
+   },
+   {
+    "name": "color-icon-orange",
+    "value": {
+     "light": "#622700",
+     "dark": "#ff9e55"
+    },
+    "usage": "Icon color for the orange categorical badge on color-background-orange."
+   },
+   {
+    "name": "color-text-orange",
+    "value": {
+     "light": "#622700",
+     "dark": "#ffb37e"
+    },
+    "usage": "Text for the orange categorical badge on color-background-orange."
+   },
+   {
+    "name": "color-background-yellow",
+    "value": {
+     "light": "#fae19e",
+     "dark": "#453a1c"
+    },
+    "usage": "Badge and tag fill for the yellow categorical badge."
+   },
+   {
+    "name": "color-border-yellow",
+    "value": {
+     "light": "#e3c36c",
+     "dark": "#c29900"
+    },
+    "usage": "Edge for the yellow categorical badge."
+   },
+   {
+    "name": "color-icon-yellow",
+    "value": {
+     "light": "#4b3900",
+     "dark": "#e2b623"
+    },
+    "usage": "Icon color for the yellow categorical badge on color-background-yellow."
+   },
+   {
+    "name": "color-text-yellow",
+    "value": {
+     "light": "#4b3900",
+     "dark": "#eec448"
+    },
+    "usage": "Text for the yellow categorical badge on color-background-yellow."
+   },
+   {
+    "name": "color-background-green",
+    "value": {
+     "light": "#bce0bb",
+     "dark": "#2b422b"
+    },
+    "usage": "Badge and tag fill for the green categorical badge."
+   },
+   {
+    "name": "color-border-green",
+    "value": {
+     "light": "#aad4a9",
+     "dark": "#6ab26b"
+    },
+    "usage": "Edge for the green categorical badge."
+   },
+   {
+    "name": "color-icon-green",
+    "value": {
+     "light": "#00490b",
+     "dark": "#90ca90"
+    },
+    "usage": "Icon color for the green categorical badge on color-background-green."
+   },
+   {
+    "name": "color-text-green",
+    "value": {
+     "light": "#00490b",
+     "dark": "#90ca90"
+    },
+    "usage": "Text for the green categorical badge on color-background-green."
+   },
+   {
+    "name": "color-background-teal",
+    "value": {
+     "light": "#a9e2d6",
+     "dark": "#28413c"
+    },
+    "usage": "Badge and tag fill for the teal categorical badge."
+   },
+   {
+    "name": "color-border-teal",
+    "value": {
+     "light": "#90d7c8",
+     "dark": "#4fb1a0"
+    },
+    "usage": "Edge for the teal categorical badge."
+   },
+   {
+    "name": "color-icon-teal",
+    "value": {
+     "light": "#00463d",
+     "dark": "#81c9bb"
+    },
+    "usage": "Icon color for the teal categorical badge on color-background-teal."
+   },
+   {
+    "name": "color-text-teal",
+    "value": {
+     "light": "#00463d",
+     "dark": "#90d7c8"
+    },
+    "usage": "Text for the teal categorical badge on color-background-teal."
+   },
+   {
+    "name": "color-background-cyan",
+    "value": {
+     "light": "#9ae2f4",
+     "dark": "#274046"
+    },
+    "usage": "Badge and tag fill for the cyan categorical badge."
+   },
+   {
+    "name": "color-border-cyan",
+    "value": {
+     "light": "#85d5e9",
+     "dark": "#49adc4"
+    },
+    "usage": "Edge for the cyan categorical badge."
+   },
+   {
+    "name": "color-icon-cyan",
+    "value": {
+     "light": "#004351",
+     "dark": "#71c7dd"
+    },
+    "usage": "Icon color for the cyan categorical badge on color-background-cyan."
+   },
+   {
+    "name": "color-text-cyan",
+    "value": {
+     "light": "#004351",
+     "dark": "#85d5e9"
+    },
+    "usage": "Text for the cyan categorical badge on color-background-cyan."
+   },
+   {
+    "name": "color-background-blue",
+    "value": {
+     "light": "#b9d7ff",
+     "dark": "#253c5a"
+    },
+    "usage": "Badge and tag fill for the blue categorical badge."
+   },
+   {
+    "name": "color-border-blue",
+    "value": {
+     "light": "#a1caff",
+     "dark": "#5aa0f8"
+    },
+    "usage": "Edge for the blue categorical badge."
+   },
+   {
+    "name": "color-icon-blue",
+    "value": {
+     "light": "#003978",
+     "dark": "#88bcff"
+    },
+    "usage": "Icon color for the blue categorical badge on color-background-blue."
+   },
+   {
+    "name": "color-text-blue",
+    "value": {
+     "light": "#003978",
+     "dark": "#a1caff"
+    },
+    "usage": "Text for the blue categorical badge on color-background-blue."
+   },
+   {
+    "name": "color-background-purple",
+    "value": {
+     "light": "#f7d5ff",
+     "dark": "#4a2f51"
+    },
+    "usage": "Badge and tag fill for the purple categorical badge."
+   },
+   {
+    "name": "color-border-purple",
+    "value": {
+     "light": "#f3bfff",
+     "dark": "#d885eb"
+    },
+    "usage": "Edge for the purple categorical badge."
+   },
+   {
+    "name": "color-icon-purple",
+    "value": {
+     "light": "#5c0e6c",
+     "dark": "#e496f6"
+    },
+    "usage": "Icon color for the purple categorical badge on color-background-purple."
+   },
+   {
+    "name": "color-text-purple",
+    "value": {
+     "light": "#5c0e6c",
+     "dark": "#eaacf8"
+    },
+    "usage": "Text for the purple categorical badge on color-background-purple."
+   },
+   {
+    "name": "color-background-pink",
+    "value": {
+     "light": "#ffc0d7",
+     "dark": "#572b3d"
+    },
+    "usage": "Badge and tag fill for the pink categorical badge."
+   },
+   {
+    "name": "color-border-pink",
+    "value": {
+     "light": "#ffc0d7",
+     "dark": "#fc78b1"
+    },
+    "usage": "Edge for the pink categorical badge."
+   },
+   {
+    "name": "color-icon-pink",
+    "value": {
+     "light": "#70003f",
+     "dark": "#fd92bd"
+    },
+    "usage": "Icon color for the pink categorical badge on color-background-pink."
+   },
+   {
+    "name": "color-text-pink",
+    "value": {
+     "light": "#70003f",
+     "dark": "#ffa9ca"
+    },
+    "usage": "Text for the pink categorical badge on color-background-pink."
+   },
+   {
+    "name": "color-background-gray",
+    "value": {
+     "light": "#e2e2e2",
+     "dark": "#303030"
+    },
+    "usage": "Badge and tag fill for the gray categorical badge."
+   },
+   {
+    "name": "color-border-gray",
+    "value": {
+     "light": "#d4d4d4",
+     "dark": "#262626"
+    },
+    "usage": "Edge for the gray categorical badge."
+   },
+   {
+    "name": "color-icon-gray",
+    "value": {
+     "light": "#474747",
+     "dark": "#9e9e9e"
+    },
+    "usage": "Icon color for the gray categorical badge on color-background-gray."
+   },
+   {
+    "name": "color-text-gray",
+    "value": {
+     "light": "#1b1b1b",
+     "dark": "#d4d4d4"
+    },
+    "usage": "Text for the gray categorical badge on color-background-gray."
+   }
+  ]
+ },
+ "type": {
+  "fonts": [],
+  "families": {
+   "body": "Figtree, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+   "heading": "Figtree, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+   "code": "ui-monospace, \"SF Mono\", Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+  },
+  "groups": [
+   {
+    "name": "Display",
+    "family": "heading",
+    "styles": [
+     {
+      "name": "display-1",
+      "fontSize": "42px",
+      "lineHeight": "52px",
+      "fontWeight": 400,
+      "usage": "Hero and marketing headlines only."
+     },
+     {
+      "name": "display-2",
+      "fontSize": "35px",
+      "lineHeight": "44px",
+      "fontWeight": 400,
+      "usage": "Large page intros."
+     },
+     {
+      "name": "display-3",
+      "fontSize": "29px",
+      "lineHeight": "36px",
+      "fontWeight": 400,
+      "usage": "Big numbers and dashboard titles."
+     }
+    ]
+   },
+   {
+    "name": "Heading",
+    "family": "heading",
+    "styles": [
+     {
+      "name": "heading-1",
+      "fontSize": "24px",
+      "lineHeight": "32px",
+      "fontWeight": 600,
+      "usage": "Page title, one per view."
+     },
+     {
+      "name": "heading-2",
+      "fontSize": "20px",
+      "lineHeight": "28px",
+      "fontWeight": 600,
+      "usage": "Section title."
+     },
+     {
+      "name": "heading-3",
+      "fontSize": "17px",
+      "lineHeight": "24px",
+      "fontWeight": 700,
+      "usage": "Subsection title (bold in Neutral)."
+     },
+     {
+      "name": "heading-4",
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 700,
+      "usage": "Card and group title (bold in Neutral)."
+     },
+     {
+      "name": "heading-5",
+      "fontSize": "12px",
+      "lineHeight": "20px",
+      "fontWeight": 600,
+      "usage": "Small group label."
+     },
+     {
+      "name": "heading-6",
+      "fontSize": "10px",
+      "lineHeight": "16px",
+      "fontWeight": 600,
+      "usage": "Smallest heading."
+     }
+    ]
+   },
+   {
+    "name": "Text",
+    "family": "body",
+    "styles": [
+     {
+      "name": "large",
+      "fontSize": "17px",
+      "lineHeight": "24px",
+      "fontWeight": 600,
+      "usage": "Lead text and emphasized intros."
+     },
+     {
+      "name": "body",
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 400,
+      "usage": "Default body copy."
+     },
+     {
+      "name": "label",
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 500,
+      "usage": "Control and field labels."
+     },
+     {
+      "name": "supporting",
+      "fontSize": "12px",
+      "lineHeight": "20px",
+      "fontWeight": 400,
+      "usage": "Helper text, captions, metadata."
+     },
+     {
+      "name": "code",
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 400,
+      "usage": "Inline and block code.",
+      "family": "code"
+     }
+    ]
+   }
+  ]
+ },
+ "spacing": {
+  "tokens": [
+   {
+    "name": "spacing-0",
+    "value": "0rem",
+    "usage": "0px at a 16px root (4px x 0)."
+   },
+   {
+    "name": "spacing-0-5",
+    "value": "0.125rem",
+    "usage": "2px at a 16px root (4px x 0.5)."
+   },
+   {
+    "name": "spacing-1",
+    "value": "0.25rem",
+    "usage": "Tight inner gaps; the segmented-control inset in Neutral."
+   },
+   {
+    "name": "spacing-1-5",
+    "value": "0.375rem",
+    "usage": "6px at a 16px root (4px x 1.5)."
+   },
+   {
+    "name": "spacing-2",
+    "value": "0.5rem",
+    "usage": "Gap between an icon and its label; stacked form rows."
+   },
+   {
+    "name": "spacing-3",
+    "value": "0.75rem",
+    "usage": "Card and section padding in Neutral."
+   },
+   {
+    "name": "spacing-4",
+    "value": "1rem",
+    "usage": "Default gap between groups."
+   },
+   {
+    "name": "spacing-5",
+    "value": "1.25rem",
+    "usage": "20px at a 16px root (4px x 5)."
+   },
+   {
+    "name": "spacing-6",
+    "value": "1.5rem",
+    "usage": "Separation between page sections."
+   },
+   {
+    "name": "spacing-7",
+    "value": "1.75rem",
+    "usage": "28px at a 16px root (4px x 7)."
+   },
+   {
+    "name": "spacing-8",
+    "value": "2rem",
+    "usage": "Large layout gutters."
+   },
+   {
+    "name": "spacing-9",
+    "value": "2.25rem",
+    "usage": "36px at a 16px root (4px x 9)."
+   },
+   {
+    "name": "spacing-10",
+    "value": "2.5rem",
+    "usage": "40px at a 16px root (4px x 10)."
+   },
+   {
+    "name": "spacing-11",
+    "value": "2.75rem",
+    "usage": "44px at a 16px root (4px x 11)."
+   },
+   {
+    "name": "spacing-12",
+    "value": "3rem",
+    "usage": "48px at a 16px root (4px x 12)."
+   }
+  ]
+ },
+ "radius": {
+  "tokens": [
+   {
+    "name": "radius-none",
+    "value": "0px",
+    "usage": "Square edges; fixed, never themed."
+   },
+   {
+    "name": "radius-inner",
+    "value": "0.375rem",
+    "usage": "Small parts inside controls: checkboxes, tags, inner chips."
+   },
+   {
+    "name": "radius-element",
+    "value": "0.625rem",
+    "usage": "Buttons, inputs, menu items."
+   },
+   {
+    "name": "radius-container",
+    "value": "0.75rem",
+    "usage": "Cards, popovers, dialogs."
+   },
+   {
+    "name": "radius-page",
+    "value": "1.75rem",
+    "usage": "Page-level sheets and large panels."
+   },
+   {
+    "name": "radius-chat",
+    "value": "28px",
+    "usage": "Chat bubbles, composer and chat drawer (core default; tracks radius-page)."
+   },
+   {
+    "name": "radius-full",
+    "value": "9999px",
+    "usage": "Pills, avatars, switches; fixed."
+   }
+  ]
+ },
+ "shadow": {
+  "tokens": [
+   {
+    "name": "shadow-low",
+    "value": {
+     "light": "0 2px 4px rgba(0,0,0,0.05), 0 4px 8px rgba(0,0,0,0.1)",
+     "dark": "0 2px 4px rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.08)"
+    },
+    "usage": "Cards and resting raised elements. Dark mode adds a 1px white rim."
+   },
+   {
+    "name": "shadow-med",
+    "value": {
+     "light": "0 2px 4px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.1)",
+     "dark": "0 2px 4px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.12)"
+    },
+    "usage": "Popovers, menus, dropdowns."
+   },
+   {
+    "name": "shadow-high",
+    "value": {
+     "light": "0 4px 6px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.15)",
+     "dark": "0 4px 6px rgba(0,0,0,0.5), 0 12px 24px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.15)"
+    },
+    "usage": "Dialogs, drawers, toasts: the top of the stack."
+   },
+   {
+    "name": "shadow-inset-hover",
+    "value": "inset 0px 0px 0px 2px #0074e24d",
+    "usage": "Hover ring on selectable cards and items."
+   },
+   {
+    "name": "shadow-inset-selected",
+    "value": "inset 0px 0px 0px 2px #0074e280",
+    "usage": "Selected ring on selectable cards and items."
+   },
+   {
+    "name": "shadow-inset-success",
+    "value": "inset 0px 0px 0px 2px #2f7d334d",
+    "usage": "Success validation ring on inputs."
+   },
+   {
+    "name": "shadow-inset-warning",
+    "value": "inset 0px 0px 0px 2px #f8d36a4d",
+    "usage": "Warning validation ring on inputs."
+   },
+   {
+    "name": "shadow-inset-error",
+    "value": "inset 0px 0px 0px 2px #de47454d",
+    "usage": "Error validation ring on inputs."
+   }
+  ]
+ },
+ "size": {
+  "tokens": [
+   {
+    "name": "size-element-sm",
+    "value": "28px",
+    "usage": "Small controls: compact buttons, inputs, segmented controls."
+   },
+   {
+    "name": "size-element-md",
+    "value": "32px",
+    "usage": "Default control height."
+   },
+   {
+    "name": "size-element-lg",
+    "value": "36px",
+    "usage": "Large controls and touch-leaning layouts."
+   },
+   {
+    "name": "border-width",
+    "value": "1px",
+    "usage": "Every hairline border."
+   },
+   {
+    "name": "focus-outline-width",
+    "value": "2px",
+    "usage": "Keyboard focus ring width; the ring is solid color-accent."
+   },
+   {
+    "name": "focus-outline-offset",
+    "value": "3px",
+    "usage": "Gap between a control and its focus ring."
+   }
+  ]
+ },
+ "meta": {
+  "source": "github",
+  "repo": "aviationkjs/astryx",
+  "ref": "main@b8835b8",
+  "package": "packages/themes/neutral",
+  "paths": {
+   "tokens": [
+    "packages/themes/neutral/src/neutralTheme.ts",
+    "packages/themes/neutral/src/neutralPaletteRefs.generated.ts",
+    "packages/core/src/theme/tokens.stylex.ts"
+   ],
+   "fonts": [
+    "packages/themes/neutral/fonts.css"
+   ],
+   "assets": [
+    "apps/docsite/src/components/logos.tsx",
+    "apps/docsite/public/favicon.svg"
+   ],
+   "docs": [
+    "README.md",
+    "docs/design/"
+   ]
+  },
+  "synced": "2026-11-19"
+ }
+}
