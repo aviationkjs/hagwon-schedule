@@ -72,8 +72,24 @@ export function makeRepo(db: Firestore) {
       return s.exists() ? ({ uid, ...s.data() } as UserProfile) : null;
     },
 
+    /**
+     * 구성원 등록·수정. 이미 연결된 계정이 있으면 그 계정의 프로필(역할·반·자녀)도 같이 바꾼다.
+     */
     async saveInvite(a: string, invite: Omit<Invite, "claimedBy">): Promise<void> {
-      await setDoc(ref(a, "invites", invite.phone), { ...invite, claimedBy: null });
+      const inviteRef = ref(a, "invites", invite.phone);
+      const existing = await getDoc(inviteRef);
+      const claimedBy = existing.exists() ? ((existing.data() as Invite).claimedBy ?? null) : null;
+      const batch = writeBatch(db);
+      batch.set(inviteRef, { ...invite, claimedBy });
+      if (claimedBy) {
+        batch.update(doc(db, "users", claimedBy), {
+          role: invite.role,
+          name: invite.name,
+          studentIds: invite.studentIds,
+          classIds: invite.classIds,
+        });
+      }
+      await batch.commit();
     },
 
     async listInvites(a: string): Promise<Invite[]> {

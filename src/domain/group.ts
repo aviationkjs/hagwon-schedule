@@ -1,3 +1,5 @@
+import { gradeOf } from "./grade";
+
 export type Group = { id: string; name: string; gradeMin: number; gradeMax: number };
 
 /** 학년 번호 기준 기본 그룹: 초등 1~6, 중등 7~9, 고등 10~12 */
@@ -22,4 +24,19 @@ export function findGroupOverlaps(groups: Group[]): Array<[string, string]> {
     }
   }
   return pairs;
+}
+
+/** 학년 범위 0~0 그룹은 자동 배정하지 않는 '수동 지정 전용' 그룹 (예: 특목반). */
+export const isManualOnly = (g: Group) => g.gradeMin === 0 && g.gradeMax === 0;
+
+/** 학생이 실제로 속한 그룹: 수동 지정 > 생년으로 계산한 학년의 그룹 */
+export function effectiveGroupId(
+  birthDate: string,
+  overrideGroupId: string | null,
+  groups: Group[],
+  today: Date,
+): string | null {
+  if (overrideGroupId) return overrideGroupId;
+  const grade = gradeOf(birthDate, today);
+  return grade === null ? null : (groupOfGrade(grade, groups)?.id ?? null);
 }
