@@ -67,6 +67,7 @@ fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px;
 
 .input, select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px; min-height: 44px; width: 100%; }
 textarea.input { resize: vertical; }
+.row select { width: auto; flex: 0 1 auto; }
 
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
