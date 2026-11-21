@@ -87,3 +87,43 @@ it("전화번호 초대는 한 번만 연결된다", async () => {
   expect(p.role).toBe("parent");
   await expect(makeRepo(await dbAs("u2")).claimInvite(A, "u2", "01012345678")).rejects.toThrow("이미");
 });
+
+it("구성원을 지우면 초대와 연결된 계정 프로필이 함께 지워진다", async () => {
+  const repo = makeRepo(await adminDb());
+  await repo.saveInvite(A, { phone: "01011112222", role: "parent", name: "학부모", studentIds: [], classIds: [] });
+  await makeRepo(await dbAs("u1")).claimInvite(A, "u1", "01011112222");
+  await repo.deleteMember(A, "01011112222", "admin1");
+  expect(await repo.listInvites(A)).toEqual([]);
+  // 지워진 프로필은 규칙상 관리자도 읽을 수 없으므로 규칙을 끄고 확인한다
+  const env = await testEnv();
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    expect((await getDoc(doc(ctx.firestore() as unknown as Firestore, "users", "u1"))).exists()).toBe(false);
+  });
+});
+
+it("관리자는 자기 자신을 지울 수 없다", async () => {
+  const repo = makeRepo(await adminDb());
+  await repo.saveInvite(A, { phone: "01000000001", role: "admin", name: "원장", studentIds: [], classIds: [] });
+  const env = await testEnv();
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore() as unknown as Firestore, "academies", A, "invites", "01000000001"), {
+      phone: "01000000001", role: "admin", name: "원장", studentIds: [], classIds: [], claimedBy: "admin1",
+    });
+  });
+  await expect(repo.deleteMember(A, "01000000001", "admin1")).rejects.toThrow("본인");
+});
+
+it("학생을 지우면 학부모 연결에서도 빠지고 볼 수 있는 반이 다시 계산된다", async () => {
+  const repo = makeRepo(await adminDb());
+  const s1 = await repo.saveStudent(A, { name: "첫째", birthDate: "2014-01-01", overrideGroupId: null, overrideReason: "", classIds: ["c1"], photoConsent: false });
+  const s2 = await repo.saveStudent(A, { name: "둘째", birthDate: "2016-01-01", overrideGroupId: null, overrideReason: "", classIds: ["c2"], photoConsent: false });
+  await repo.saveInvite(A, { phone: "01033334444", role: "parent", name: "학부모", studentIds: [s1, s2], classIds: ["c1", "c2"] });
+  await makeRepo(await dbAs("u1")).claimInvite(A, "u1", "01033334444");
+
+  await repo.deleteStudent(A, s1);
+
+  expect((await repo.listStudents(A)).map((s) => s.id)).toEqual([s2]);
+  const [inv] = await repo.listInvites(A);
+  expect(inv).toMatchObject({ studentIds: [s2], classIds: ["c2"] });
+  expect(await repo.getProfile("u1")).toMatchObject({ studentIds: [s2], classIds: ["c2"] });
+});

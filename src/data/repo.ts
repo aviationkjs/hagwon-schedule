@@ -98,6 +98,22 @@ export function makeRepo(db: Firestore) {
       return s.docs.map((d) => d.data() as Invite);
     },
 
+    /**
+     * 구성원 삭제: 초대를 지우고, 이미 연결된 계정이 있으면 그 프로필도 지워 바로 접근을 막는다.
+     * (Google 계정 자체는 남는다. 같은 번호로 다시 초대하면 다시 연결할 수 있다.)
+     */
+    async deleteMember(a: string, phone: string, actorUid: string): Promise<void> {
+      const inviteRef = ref(a, "invites", phone);
+      const s = await getDoc(inviteRef);
+      if (!s.exists()) return;
+      const claimedBy = (s.data() as Invite).claimedBy;
+      if (claimedBy === actorUid) throw new Error("본인 계정은 지울 수 없습니다.");
+      const batch = writeBatch(db);
+      batch.delete(inviteRef);
+      if (claimedBy) batch.delete(doc(db, "users", claimedBy));
+      await batch.commit();
+    },
+
     /** 첫 로그인: 전화번호로 초대를 찾아 프로필을 만든다. 이미 연결된 초대면 실패. */
     async claimInvite(a: string, uid: string, phone: string): Promise<UserProfile> {
       const inviteRef = ref(a, "invites", phone);
@@ -169,6 +185,24 @@ export function makeRepo(db: Firestore) {
       const s = await getDocs(col(a, "students"));
       const all = s.docs.map((d) => withId<Student>(d.id, d.data()));
       return ids ? all.filter((x) => ids.includes(x.id)) : all;
+    },
+
+    /**
+     * 학생 삭제: 학생을 지우고, 이 학생을 가진 학부모·학생 연결에서 빼며
+     * 그 사람이 볼 수 있는 반을 남은 학생들의 반으로 다시 계산한다.
+     */
+    async deleteStudent(a: string, studentId: string): Promise<void> {
+      const [students, invites] = await Promise.all([this.listStudents(a), this.listInvites(a)]);
+      const remaining = students.filter((s) => s.id !== studentId);
+      const batch = writeBatch(db);
+      batch.delete(ref(a, "students", studentId));
+      for (const inv of invites.filter((i) => i.studentIds.includes(studentId))) {
+        const studentIds = inv.studentIds.filter((id) => id !== studentId);
+        const classIds = [...new Set(remaining.filter((s) => studentIds.includes(s.id)).flatMap((s) => s.classIds))];
+        batch.update(ref(a, "invites", inv.phone), { studentIds, classIds });
+        if (inv.claimedBy) batch.update(doc(db, "users", inv.claimedBy), { studentIds, classIds });
+      }
+      await batch.commit();
     },
 
     async getStudents(a: string, ids: string[]): Promise<Student[]> {

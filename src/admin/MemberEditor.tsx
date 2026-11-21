@@ -2,12 +2,16 @@ import { useState, type FormEvent } from "react";
 import { repo, ACADEMY_ID, ROLE_LABEL, type Invite, type Role } from "../data";
 import { normalizePhone } from "../domain/phone";
 import { useLoad } from "../lib/useLoad";
+import { useAuth } from "../auth/AuthProvider";
+import { ConfirmDelete } from "./ConfirmDelete";
 
 type Draft = { name: string; phone: string; role: Role; studentIds: string[]; classIds: string[] };
 const EMPTY: Draft = { name: "", phone: "", role: "parent", studentIds: [], classIds: [] };
 
 /** 구성원 등록: 전화번호로 초대해 두면 그 사람이 Google 로그인 후 번호를 입력해 연결한다. */
 export function MemberEditor() {
+  const me = useAuth().profile!;
+  const [deleting, setDeleting] = useState<string | null>(null);
   const data = useLoad(async () => {
     const [invites, students, classes] = await Promise.all([
       repo.listInvites(ACADEMY_ID),
@@ -59,22 +63,44 @@ export function MemberEditor() {
       </p>
       <ul className="list">
         {invites.map((i: Invite) => (
-          <li key={i.phone} className="card row">
-            <span>
-              <strong>{i.name}</strong> <span className="muted small">{ROLE_LABEL[i.role]} · {i.phone}</span>
-            </span>
-            <span className="row gap">
-              <span className={i.claimedBy ? "badge ok" : "badge"}>{i.claimedBy ? "연결됨" : "로그인 전"}</span>
-              <button
-                className="btn"
-                onClick={() => {
-                  setEditingPhone(i.phone);
-                  setDraft({ name: i.name, phone: i.phone, role: i.role, studentIds: i.studentIds, classIds: i.classIds });
+          <li key={i.phone} className="card">
+            <div className="row wrap">
+              <span>
+                <strong>{i.name}</strong> <span className="muted small">{ROLE_LABEL[i.role]} · {i.phone}</span>
+              </span>
+              <span className="row gap">
+                <span className={i.claimedBy ? "badge ok" : "badge"}>{i.claimedBy ? "연결됨" : "로그인 전"}</span>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    setEditingPhone(i.phone);
+                    setDraft({ name: i.name, phone: i.phone, role: i.role, studentIds: i.studentIds, classIds: i.classIds });
+                  }}
+                >
+                  수정
+                </button>
+                {i.claimedBy !== me.uid && (
+                  <button className="btn danger" onClick={() => setDeleting(i.phone)}>
+                    삭제
+                  </button>
+                )}
+              </span>
+            </div>
+            {deleting === i.phone && (
+              <ConfirmDelete
+                text={
+                  i.claimedBy
+                    ? `${i.name}님을 구성원에서 지웁니다. 연결된 계정은 바로 앱을 쓸 수 없게 됩니다. 되돌릴 수 없습니다.`
+                    : `${i.name}님의 초대를 지웁니다. 되돌릴 수 없습니다.`
+                }
+                onCancel={() => setDeleting(null)}
+                onConfirm={async () => {
+                  await repo.deleteMember(ACADEMY_ID, i.phone, me.uid);
+                  setDeleting(null);
+                  await data.reload();
                 }}
-              >
-                수정
-              </button>
-            </span>
+              />
+            )}
           </li>
         ))}
       </ul>

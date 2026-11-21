@@ -27,7 +27,7 @@ export function LoginPage() {
 
   return (
     <div className="center-page">
-      <h1>학원 스케줄</h1>
+      <h1>김항철 academy</h1>
       <p className="muted">수업 일정, 공지, 변경 요청을 한 곳에서</p>
       <button className="btn primary" onClick={login}>
         Google로 로그인

@@ -3,6 +3,7 @@ import { repo, ACADEMY_ID, type Student } from "../data";
 import { gradeLabel, gradeOf } from "../domain/grade";
 import { effectiveGroupId } from "../domain/group";
 import { useLoad } from "../lib/useLoad";
+import { ConfirmDelete } from "./ConfirmDelete";
 
 type Draft = Omit<Student, "id">;
 const EMPTY: Draft = { name: "", birthDate: "", overrideGroupId: null, overrideReason: "", classIds: [], photoConsent: false };
@@ -18,6 +19,7 @@ export function StudentEditor() {
   }, []);
   const [editing, setEditing] = useState<{ id?: string; value: Draft } | null>(null);
   const [overriding, setOverriding] = useState<Student | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
   const today = new Date();
 
@@ -65,7 +67,21 @@ export function StudentEditor() {
                 <button className="btn" onClick={() => setOverriding(s)}>
                   그룹 수동 지정
                 </button>
+                <button className="btn danger" onClick={() => setDeleting(s.id)}>
+                  삭제
+                </button>
               </div>
+              {deleting === s.id && (
+                <ConfirmDelete
+                  text={`${s.name} 학생을 지웁니다. 연결된 학부모·학생 계정에서도 빠지고, 그 학부모가 볼 수 있는 반도 다시 계산됩니다. 되돌릴 수 없습니다.`}
+                  onCancel={() => setDeleting(null)}
+                  onConfirm={async () => {
+                    await repo.deleteStudent(ACADEMY_ID, s.id);
+                    setDeleting(null);
+                    await data.reload();
+                  }}
+                />
+              )}
             </li>
           );
         })}

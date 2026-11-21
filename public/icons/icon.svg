@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 김항철 academy 앱 아이콘: 학사모 + 펼친 책. 바탕은 Astryx accent(#1b1b1b). 원형으로 잘려도 보이게 가운데 80% 안에 둔다. -->
+  <rect width="512" height="512" fill="#1b1b1b"/>
+  <!-- 펼친 책 -->
+  <path d="M256 318 C 220 292 168 286 126 300 L 126 398 C 168 386 220 392 256 418 Z" fill="#ffffff"/>
+  <path d="M256 318 C 292 292 344 286 386 300 L 386 398 C 344 386 292 392 256 418 Z" fill="#ffffff"/>
+  <path d="M256 318 L 256 418" stroke="#1b1b1b" stroke-width="8"/>
+  <path d="M150 322 C 182 314 214 318 238 332 M150 346 C 182 338 214 342 238 356 M274 332 C 298 318 330 314 362 322 M274 356 C 298 342 330 338 362 346"
+        stroke="#d4d4d4" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <!-- 학사모 -->
+  <path d="M178 196 L 178 248 C 178 266 216 280 256 280 C 296 280 334 266 334 248 L 334 196 Z" fill="#d4d4d4"/>
+  <path d="M256 108 L 410 172 L 256 236 L 102 172 Z" fill="#ffffff"/>
+  <path d="M396 178 L 396 250" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="396" cy="258" r="12" fill="#ffffff"/>
+</svg>
