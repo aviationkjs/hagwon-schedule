@@ -27,3 +27,11 @@ export function transition(
   }
   return { ok: true };
 }
+
+/** 기획서 3.2: 접수 후 7일 안에 답장. Cloud Functions 없이 화면에서 배지로 알린다. */
+export const RESPONSE_DAYS = 7;
+
+export function isOverdue(req: { status: RequestStatus; createdAt: Date }, now: Date): boolean {
+  if (req.status === "반영" || req.status === "반려") return false;
+  return now.getTime() - req.createdAt.getTime() > RESPONSE_DAYS * 24 * 60 * 60 * 1000;
+}
