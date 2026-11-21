@@ -1,8 +1,97 @@
 rules_version = '2';
+
+// 권한 표: 기획서 2장
+//  관리자: 일정·편성·공지·요청 처리 / 강사·학부모·학생: 보기 + 변경 요청
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    function signedIn() { return request.auth != null; }
+    function userPath(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function hasProfile() { return signedIn() && exists(userPath(request.auth.uid)); }
+    function me() { return get(userPath(request.auth.uid)).data; }
+    function member(a) { return hasProfile() && me().academyId == a; }
+    function isAdmin(a) { return member(a) && me().role == 'admin'; }
+    function isStaff(a) { return member(a) && me().role in ['admin', 'teacher']; }
+
+    // 첫 로그인 연결: 초대 내용과 똑같은 프로필만 만들 수 있다.
+    function claimMatches(d) {
+      let inv = getAfter(/databases/$(database)/documents/academies/$(d.academyId)/invites/$(d.phone)).data;
+      return d.keys().hasOnly(['academyId', 'role', 'name', 'phone', 'studentIds', 'classIds'])
+        && inv.claimedBy == request.auth.uid
+        && d.role == inv.role
+        && d.name == inv.name
+        && d.studentIds == inv.studentIds
+        && d.classIds == inv.classIds;
+    }
+
+    match /users/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin(resource.data.academyId));
+      allow list: if false;
+      allow create: if signedIn() && request.auth.uid == uid && claimMatches(request.resource.data);
+      allow update, delete: if isAdmin(resource.data.academyId);
+    }
+
+    match /academies/{a} {
+
+      match /invites/{phone} {
+        allow get: if signedIn();
+        allow list, create, delete: if isAdmin(a);
+        allow update: if isAdmin(a)
+          || (signedIn()
+              && resource.data.claimedBy == null
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['claimedBy'])
+              && request.resource.data.claimedBy == request.auth.uid
+              && existsAfter(userPath(request.auth.uid)));
+      }
+
+      match /groups/{id} {
+        allow read: if member(a);
+        allow write: if isAdmin(a);
+      }
+
+      match /classes/{id} {
+        allow read: if member(a);
+        allow write: if isAdmin(a);
+      }
+
+      match /students/{id} {
+        allow read: if isStaff(a) || (member(a) && id in me().studentIds);
+        allow write: if isAdmin(a);
+      }
+
+      match /sessions/{id} {
+        allow read: if isStaff(a) || (member(a) && resource.data.classId in me().classIds);
+        allow write: if isAdmin(a);
+      }
+
+      match /requests/{id} {
+        allow read: if isAdmin(a) || (member(a) && resource.data.requesterUid == request.auth.uid);
+        allow create: if member(a)
+          && request.resource.data.requesterUid == request.auth.uid
+          && request.resource.data.status == '접수'
+          && request.resource.data.handledBy == null
+          && (isStaff(a) || request.resource.data.classId in me().classIds);
+        allow update: if isAdmin(a);
+        allow delete: if false;
+      }
+
+      match /notices/{id} {
+        allow read: if member(a);
+        allow create: if isAdmin(a)
+          || (member(a)
+              && request.resource.data.board == '자유'
+              && request.resource.data.authorUid == request.auth.uid
+              && request.resource.data.target.kind == 'all'
+              && request.resource.data.pinned == false);
+        allow update, delete: if isAdmin(a)
+          || (member(a) && resource.data.board == '자유' && resource.data.authorUid == request.auth.uid
+              && (request.resource == null || request.resource.data.board == '자유'));
+      }
+
+      match /audit_log/{id} {
+        allow read, create: if isAdmin(a);
+        allow update, delete: if false;
+      }
     }
   }
 }
