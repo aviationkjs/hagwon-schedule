@@ -1,54 +1,66 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
-import { canSeeAllClasses } from "../auth/roles";
+import { canManageSchedule, canSeeAllClasses } from "../auth/roles";
 import { repo, ACADEMY_ID } from "../data";
-import { addDays, weekStartOf } from "../domain/week";
-import { dayLabel } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
+import { RequestForm } from "../requests/RequestForm";
+import { AddSessionSheet } from "./AddSessionSheet";
+import { CalendarView } from "./CalendarView";
+import { classHue, HUE_LABEL, toEvents } from "./calendar";
 import { filterSessions, type SessionFilter } from "./filter";
 import { SessionDetail } from "./SessionDetail";
-import { WeekView } from "./WeekView";
-import { RequestForm } from "../requests/RequestForm";
 
 export function SchedulePage() {
   const { profile } = useAuth();
   const role = profile!.role;
   const seeAll = canSeeAllClasses(role);
-  const [weekStart, setWeekStart] = useState(() => weekStartOf(new Date()));
+  const isAdmin = canManageSchedule(role);
+
+  const [range, setRange] = useState<{ start: Date; end: Date } | null>(null);
   const [filter, setFilter] = useState<SessionFilter>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [adding, setAdding] = useState<{ start: Date; end: Date } | null>(null);
 
-  const meta = useLoad(
-    async () => {
-      const [classes, groups] = await Promise.all([repo.listClasses(ACADEMY_ID), repo.listGroups(ACADEMY_ID)]);
-      return { classes, groups };
-    },
-    [],
-  );
+  const meta = useLoad(async () => {
+    const [classes, groups] = await Promise.all([repo.listClasses(ACADEMY_ID), repo.listGroups(ACADEMY_ID)]);
+    return { classes, groups };
+  }, []);
+
+  // 캘린더가 보여 주는 기간만 읽는다 (월 보기면 한 달 치).
   const sessions = useLoad(
-    () => repo.listSessionsForWeek(ACADEMY_ID, weekStart, seeAll ? undefined : profile!.classIds),
-    [weekStart, seeAll, profile],
+    async () =>
+      range ? repo.listSessionsInRange(ACADEMY_ID, range.start, range.end, seeAll ? undefined : profile!.classIds) : [],
+    [range, seeAll, profile],
   );
+
+  const onRangeChange = useCallback((start: Date, end: Date) => {
+    setRange((r) => (r && r.start.getTime() === start.getTime() && r.end.getTime() === end.getTime() ? r : { start, end }));
+  }, []);
 
   const classes = meta.data?.classes ?? [];
   const groups = meta.data?.groups ?? [];
   const visibleClasses = seeAll ? classes : classes.filter((c) => profile!.classIds.includes(c.id));
   const teachers = [...new Map(visibleClasses.map((c) => [c.teacherId, c.teacherName])).entries()];
   const shown = filterSessions(sessions.data ?? [], classes, filter);
+  const events = useMemo(() => toEvents(shown, classes), [shown, classes]);
   const selected = sessions.data?.find((s) => s.id === selectedId);
+
+  function startAdding() {
+    const start = new Date();
+    start.setMinutes(0, 0, 0);
+    start.setHours(start.getHours() + 1);
+    setAdding({ start, end: new Date(start.getTime() + 90 * 60 * 1000) });
+  }
 
   return (
     <div className="page">
-      <div className="week-nav">
-        <button className="btn" onClick={() => setWeekStart(addDays(weekStart, -7))} aria-label="이전 주">
-          ‹
-        </button>
-        <strong>
-          {dayLabel(weekStart)} – {dayLabel(addDays(weekStart, 6))}
-        </strong>
-        <button className="btn" onClick={() => setWeekStart(addDays(weekStart, 7))} aria-label="다음 주">
-          ›
-        </button>
+      <div className="row">
+        <h2>스케줄</h2>
+        {isAdmin && (
+          <button className="btn primary" onClick={startAdding}>
+            + 수업
+          </button>
+        )}
       </div>
 
       <div className="filters">
@@ -74,12 +86,27 @@ export function SchedulePage() {
         )}
       </div>
 
-      {(sessions.error || meta.error) && <p className="error">{sessions.error || meta.error}</p>}
-      {sessions.loading ? (
-        <p className="muted">불러오는 중…</p>
-      ) : (
-        <WeekView weekStart={weekStart} sessions={shown} classes={classes} onSelect={setSelectedId} />
+      {visibleClasses.length > 0 && (
+        <ul className="legend" aria-label="반 색">
+          {visibleClasses.map((c) => (
+            <li key={c.id} className={`hue-${classHue(c)}`} title={HUE_LABEL[classHue(c)]}>
+              {c.name}
+            </li>
+          ))}
+        </ul>
       )}
+
+      {(sessions.error || meta.error) && <p className="error">{sessions.error || meta.error}</p>}
+      {isAdmin && classes.length > 0 && (
+        <p className="muted small">빈 시간을 누르거나 끌면 그 시간에 수업을 넣을 수 있습니다. (휴대폰은 길게 누르기)</p>
+      )}
+
+      <CalendarView
+        events={events}
+        onRangeChange={onRangeChange}
+        onSelectEvent={setSelectedId}
+        onCreate={isAdmin ? (start, end) => setAdding({ start, end }) : undefined}
+      />
 
       {selected && (
         <SessionDetail
@@ -87,9 +114,31 @@ export function SchedulePage() {
           cls={classes.find((c) => c.id === selected.classId)}
           groups={groups}
           onClose={() => setSelectedId(null)}
+          onDelete={
+            isAdmin
+              ? async () => {
+                  await repo.deleteSession(ACADEMY_ID, selected.id);
+                  setSelectedId(null);
+                  await sessions.reload();
+                }
+              : undefined
+          }
         >
-          <RequestForm session={selected} onDone={() => setSelectedId(null)} />
+          {!isAdmin && <RequestForm session={selected} onDone={() => setSelectedId(null)} />}
         </SessionDetail>
+      )}
+
+      {adding && (
+        <AddSessionSheet
+          classes={classes}
+          start={adding.start}
+          end={adding.end}
+          onClose={() => setAdding(null)}
+          onSaved={async () => {
+            setAdding(null);
+            await sessions.reload();
+          }}
+        />
       )}
     </div>
   );

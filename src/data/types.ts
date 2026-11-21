@@ -43,6 +43,9 @@ export type Student = {
   photoConsent: boolean;
 };
 
+/** Astryx 분류용 색 이름 */
+export type Hue = "red" | "orange" | "yellow" | "green" | "teal" | "cyan" | "blue" | "purple" | "pink" | "gray";
+
 export type ClassInfo = {
   id: string;
   name: string;
@@ -50,6 +53,7 @@ export type ClassInfo = {
   teacherName: string;
   room: string;
   groupIds: string[];
+  color?: Hue; // 캘린더에서 이 반을 나타내는 색
 };
 export type ClassInput = Omit<ClassInfo, "id">;
 

@@ -297,3 +297,127 @@ textarea.input { padding: var(--spacing-2) var(--spacing-3); resize: vertical; }
 }
 .install-guide p { flex: 1; }
 .install-guide .btn.link { color: var(--color-on-accent); }
+
+/* ── 반 색 (Astryx 분류 색: 반을 구분할 뿐, 상태를 뜻하지 않는다) ── */
+.hue-red { --hue-bg: var(--color-background-red); --hue-text: var(--color-text-red); --hue-border: var(--color-border-red); --hue-icon: var(--color-icon-red); }
+.hue-orange { --hue-bg: var(--color-background-orange); --hue-text: var(--color-text-orange); --hue-border: var(--color-border-orange); --hue-icon: var(--color-icon-orange); }
+.hue-yellow { --hue-bg: var(--color-background-yellow); --hue-text: var(--color-text-yellow); --hue-border: var(--color-border-yellow); --hue-icon: var(--color-icon-yellow); }
+.hue-green { --hue-bg: var(--color-background-green); --hue-text: var(--color-text-green); --hue-border: var(--color-border-green); --hue-icon: var(--color-icon-green); }
+.hue-teal { --hue-bg: var(--color-background-teal); --hue-text: var(--color-text-teal); --hue-border: var(--color-border-teal); --hue-icon: var(--color-icon-teal); }
+.hue-cyan { --hue-bg: var(--color-background-cyan); --hue-text: var(--color-text-cyan); --hue-border: var(--color-border-cyan); --hue-icon: var(--color-icon-cyan); }
+.hue-blue { --hue-bg: var(--color-background-blue); --hue-text: var(--color-text-blue); --hue-border: var(--color-border-blue); --hue-icon: var(--color-icon-blue); }
+.hue-purple { --hue-bg: var(--color-background-purple); --hue-text: var(--color-text-purple); --hue-border: var(--color-border-purple); --hue-icon: var(--color-icon-purple); }
+.hue-pink { --hue-bg: var(--color-background-pink); --hue-text: var(--color-text-pink); --hue-border: var(--color-border-pink); --hue-icon: var(--color-icon-pink); }
+.hue-gray { --hue-bg: var(--color-background-gray); --hue-text: var(--color-text-gray); --hue-border: var(--color-border-gray); --hue-icon: var(--color-icon-gray); }
+
+.legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-1-5); }
+.legend li {
+  padding: 0 var(--spacing-2);
+  border-radius: var(--radius-full);
+  background: var(--hue-bg);
+  color: var(--hue-text);
+  font-size: var(--text-supporting-size);
+  line-height: var(--text-supporting-line);
+  font-weight: var(--text-label-weight);
+}
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: var(--radius-full); background: var(--hue-icon); }
+.swatches { display: flex; flex-wrap: wrap; gap: var(--spacing-2); }
+.swatch-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--hue-border);
+  background: var(--hue-bg);
+  cursor: pointer;
+}
+.swatch-btn.on { outline: var(--focus-outline-width) solid var(--color-accent); outline-offset: 2px; }
+
+/* ── 캘린더 (FullCalendar를 Astryx 토큰으로) ── */
+.calendar { display: flex; flex-direction: column; gap: var(--spacing-3); }
+.cal-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-2); }
+.cal-title { font-size: var(--text-heading-3-size); line-height: var(--text-heading-3-line); margin-left: var(--spacing-1); }
+.btn.icon { width: var(--control-height); padding: 0; font-size: 18px; }
+.segmented {
+  display: inline-flex;
+  padding: var(--spacing-0-5);
+  gap: var(--spacing-0-5);
+  border-radius: var(--radius-element);
+  background: var(--color-background-gray);
+}
+.segmented button {
+  min-height: calc(var(--control-height) - 4px);
+  padding: 0 var(--spacing-3);
+  border: none;
+  border-radius: var(--radius-inner);
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-weight: var(--text-label-weight);
+  cursor: pointer;
+}
+.segmented button.active { background: var(--color-background-card); color: var(--color-text-primary); box-shadow: var(--shadow-low); }
+
+.calendar .fc {
+  --fc-border-color: var(--color-border);
+  --fc-page-bg-color: var(--color-background-card);
+  --fc-neutral-bg-color: var(--color-background-muted);
+  --fc-neutral-text-color: var(--color-text-secondary);
+  --fc-today-bg-color: var(--color-overlay-hover);
+  --fc-now-indicator-color: var(--color-error);
+  --fc-highlight-color: var(--color-accent-muted);
+  --fc-list-event-hover-bg-color: var(--color-overlay-hover);
+  --fc-small-font-size: var(--text-supporting-size);
+  background: var(--color-background-card);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-container);
+  overflow: hidden;
+  font-size: var(--supporting-size);
+}
+.calendar .fc-theme-standard td, .calendar .fc-theme-standard th, .calendar .fc-theme-standard .fc-scrollgrid { border-color: var(--color-border); }
+.calendar .fc-theme-standard .fc-scrollgrid { border: none; }
+.calendar .fc-col-header-cell-cushion, .calendar .fc-daygrid-day-number, .calendar .fc-list-day-text, .calendar .fc-list-day-side-text {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--text-label-weight);
+}
+.calendar .fc-timegrid-slot-label-cushion { color: var(--color-text-secondary); }
+.calendar .fc-day-today .fc-daygrid-day-number, .calendar .fc-day-today .fc-col-header-cell-cushion {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  border-radius: var(--radius-full);
+  padding: 0 var(--spacing-1-5);
+}
+.calendar .fc-timegrid-slot { height: 2.5em; }
+
+/* 일정 블록: 반 색 바탕 + 같은 색 글자 */
+.calendar .fc-event {
+  background: var(--hue-bg, var(--color-background-gray));
+  border: var(--border-width) solid var(--hue-border, var(--color-border));
+  border-radius: var(--radius-inner);
+  color: var(--hue-text, var(--color-text-primary));
+  cursor: pointer;
+}
+.calendar .fc-event .fc-event-main { color: inherit; padding: 2px 4px; }
+.calendar .fc-event.is-changed { border-style: dashed; border-width: 2px; }
+.calendar .fc-list-event { background: none; border: none; color: var(--color-text-primary); }
+.calendar .fc-list-event-dot { border-color: var(--hue-icon, var(--color-icon-secondary)); }
+.calendar .fc-v-event .fc-event-main { color: var(--hue-text); }
+.calendar .fc-timegrid-event-harness-inset .fc-timegrid-event { box-shadow: 0 0 0 1px var(--color-background-card); }
+.ev { display: flex; flex-direction: column; overflow: hidden; line-height: 1.3; }
+.ev-time { font-variant-numeric: tabular-nums; font-size: 0.9em; opacity: 0.9; }
+.ev-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-meta { font-size: 0.9em; opacity: 0.9; }
+.ev-badge {
+  margin-left: var(--spacing-1);
+  padding: 0 var(--spacing-1);
+  border-radius: var(--radius-full);
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+.calendar .fc-list .ev { flex-direction: row; gap: var(--spacing-2); align-items: baseline; }
+.calendar .fc-list-empty { background: var(--color-background-card); color: var(--color-text-secondary); }
+.calendar .fc-list-event.is-changed { border: none; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-2); }
+.two-col label { display: flex; flex-direction: column; gap: var(--spacing-1); font-weight: var(--text-label-weight); }

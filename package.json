@@ -13,6 +13,12 @@
     "theme": "node scripts/astryx-css.mjs"
   },
   "dependencies": {
+    "@fullcalendar/core": "6.1.22",
+    "@fullcalendar/daygrid": "6.1.22",
+    "@fullcalendar/interaction": "6.1.22",
+    "@fullcalendar/list": "6.1.22",
+    "@fullcalendar/react": "6.1.22",
+    "@fullcalendar/timegrid": "6.1.22",
     "firebase": "^13.4.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

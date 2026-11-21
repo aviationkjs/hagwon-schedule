@@ -1,46 +1,67 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
 import { repo, ACADEMY_ID, type ClassInfo, type ClassInput } from "../data";
 import { useLoad } from "../lib/useLoad";
+import { classHue, HUE_LABEL, HUES } from "../schedule/calendar";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-const EMPTY: ClassInput = { name: "", teacherId: "", teacherName: "", room: "", groupIds: [] };
 
 export function ClassEditor() {
+  const { profile } = useAuth();
+  const me = profile!;
   const data = useLoad(async () => {
     const [classes, groups, invites] = await Promise.all([
       repo.listClasses(ACADEMY_ID),
       repo.listGroups(ACADEMY_ID),
       repo.listInvites(ACADEMY_ID),
     ]);
-    return { classes, groups, teachers: invites.filter((i) => i.role === "teacher" || i.role === "admin") };
+    return { classes, groups, invites };
   }, []);
   const [editing, setEditing] = useState<{ id?: string; value: ClassInput } | null>(null);
   const [scheduling, setScheduling] = useState<ClassInfo | null>(null);
   const [error, setError] = useState("");
+  const [savedName, setSavedName] = useState("");
 
   const classes = data.data?.classes ?? [];
   const groups = data.data?.groups ?? [];
-  const teachers = data.data?.teachers ?? [];
+  // 담당 강사 후보: 나 + 앱에 로그인해 연결된 강사·관리자
+  const teachers = [
+    { uid: me.uid, name: `${me.name} (나)` },
+    ...(data.data?.invites ?? [])
+      .filter((i) => (i.role === "teacher" || i.role === "admin") && i.claimedBy && i.claimedBy !== me.uid)
+      .map((i) => ({ uid: i.claimedBy!, name: i.name })),
+  ];
+  const waiting = (data.data?.invites ?? []).filter((i) => i.role === "teacher" && !i.claimedBy);
+  const empty = (): ClassInput => ({ name: "", teacherId: me.uid, teacherName: me.name, room: "", groupIds: [] });
 
   async function save(e: FormEvent) {
     e.preventDefault();
     if (!editing) return;
     const v = editing.value;
     if (!v.name.trim()) return setError("반 이름을 입력하세요.");
-    if (!v.teacherId) return setError("담당 강사를 고르세요. 강사는 '구성원'에서 등록하고, 앱에 한 번 로그인해야 고를 수 있습니다.");
     setError("");
     await repo.saveClass(ACADEMY_ID, { ...v, name: v.name.trim() }, editing.id);
+    setSavedName(editing.id ? "" : v.name.trim());
     setEditing(null);
     await data.reload();
   }
 
   return (
     <div className="stack">
+      {savedName && (
+        <p className="notice-box">
+          '{savedName}' 반을 만들었습니다. 이제 <Link to="/schedule">스케줄</Link>에서 빈 시간을 누르거나 '+ 수업'으로 수업
+          시간을 넣으세요.
+        </p>
+      )}
       <ul className="list">
         {classes.map((c) => (
           <li key={c.id} className="card">
             <div className="row">
-              <strong>{c.name}</strong>
+              <strong>
+                <span className={`swatch hue-${classHue(c)}`} aria-hidden /> {c.name}
+              </strong>
               <span className="muted small">
                 {c.teacherName} · {c.room}
               </span>
@@ -49,18 +70,19 @@ export function ClassEditor() {
               {groups.filter((g) => c.groupIds.includes(g.id)).map((g) => g.name).join(", ") || "그룹 없음"}
             </p>
             <div className="row gap">
-              <button className="btn" onClick={() => setEditing({ id: c.id, value: { ...EMPTY, ...c } })}>
+              <button className="btn" onClick={() => setEditing({ id: c.id, value: { ...empty(), ...c } })}>
                 수정
               </button>
               <button className="btn" onClick={() => setScheduling(c)}>
-                수업 일정 만들기
+                매주 반복 수업 넣기
               </button>
             </div>
           </li>
         ))}
       </ul>
+      {classes.length === 0 && !editing && <p className="muted">아직 반이 없습니다. 반을 만든 뒤 스케줄에서 수업 시간을 넣습니다.</p>}
       {!editing && (
-        <button className="btn primary" onClick={() => setEditing({ value: EMPTY })}>
+        <button className="btn primary" onClick={() => setEditing({ value: empty() })}>
           반 추가
         </button>
       )}
@@ -77,19 +99,43 @@ export function ClassEditor() {
             <select
               value={editing.value.teacherId}
               onChange={(e) => {
-                const t = teachers.find((x) => x.claimedBy === e.target.value);
-                setEditing({ ...editing, value: { ...editing.value, teacherId: e.target.value, teacherName: t?.name ?? "" } });
+                const t = teachers.find((x) => x.uid === e.target.value);
+                const name = t?.uid === me.uid ? me.name : (t?.name ?? "");
+                setEditing({ ...editing, value: { ...editing.value, teacherId: e.target.value, teacherName: name } });
               }}
             >
-              <option value="">선택</option>
               {teachers.map((t) => (
-                <option key={t.phone} value={t.claimedBy ?? ""} disabled={!t.claimedBy}>
+                <option key={t.uid} value={t.uid}>
                   {t.name}
-                  {t.claimedBy ? "" : " (로그인 전)"}
                 </option>
               ))}
             </select>
+            {waiting.length > 0 && (
+              <span className="muted small">
+                아직 로그인하지 않은 강사({waiting.map((w) => w.name).join(", ")})는 로그인한 뒤에 고를 수 있습니다.
+              </span>
+            )}
           </label>
+          <fieldset>
+            <legend>캘린더 색</legend>
+            <div className="swatches" role="radiogroup" aria-label="캘린더 색">
+              {HUES.filter((h) => h !== "gray").map((h) => {
+                const current = editing.value.color ?? classHue({ id: editing.id ?? "new", ...editing.value });
+                return (
+                  <button
+                    type="button"
+                    key={h}
+                    role="radio"
+                    aria-checked={current === h}
+                    aria-label={HUE_LABEL[h]}
+                    title={HUE_LABEL[h]}
+                    className={`swatch-btn hue-${h} ${current === h ? "on" : ""}`}
+                    onClick={() => setEditing({ ...editing, value: { ...editing.value, color: h } })}
+                  />
+                );
+              })}
+            </div>
+          </fieldset>
           <label>
             교실
             <input className="input" value={editing.value.room} onChange={(e) => setEditing({ ...editing, value: { ...editing.value, room: e.target.value } })} />

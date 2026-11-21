@@ -4,6 +4,7 @@ import {
   Timestamp,
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -138,7 +139,9 @@ export function makeRepo(db: Firestore) {
 
     async listGroups(a: string): Promise<Group[]> {
       const s = await getDocs(col(a, "groups"));
-      return s.docs.map((d) => withId<Group>(d.id, d.data()));
+      // 학년 순(초등→중등→고등), 수동 지정 전용 그룹(학년 0)은 맨 뒤
+      const order = (g: Group) => (g.gradeMin === 0 ? 99 : g.gradeMin);
+      return s.docs.map((d) => withId<Group>(d.id, d.data())).sort((x, y) => order(x) - order(y));
     },
 
     async saveClass(a: string, c: ClassInput, id?: string): Promise<string> {
@@ -209,14 +212,24 @@ export function makeRepo(db: Firestore) {
       return occ.length;
     },
 
+    /** 한 주(시작일부터 7일)의 수업. */
+    async listSessionsForWeek(a: string, weekStart: Date, classIds?: string[]): Promise<Session[]> {
+      return this.listSessionsInRange(a, weekStart, addDays(weekStart, 7), classIds);
+    },
+
+    /** 관리자: 수업 하나를 지운다. 이 수업에 걸린 변경 요청은 남는다. */
+    async deleteSession(a: string, sessionId: string): Promise<void> {
+      await deleteDoc(ref(a, "sessions", sessionId));
+    },
+
     /**
-     * 한 주(월요일 0시부터 7일)의 수업. classIds를 주면 그 반만 가져온다.
+     * start 이상 end 미만에 시작하는 수업 (캘린더가 보여 주는 기간). classIds를 주면 그 반만 가져온다.
      * 보안 규칙은 필터가 아니므로 학부모·학생은 반드시 classIds를 넘겨야 한다.
      */
-    async listSessionsForWeek(a: string, weekStart: Date, classIds?: string[]): Promise<Session[]> {
+    async listSessionsInRange(a: string, start: Date, end: Date, classIds?: string[]): Promise<Session[]> {
       const range = [
-        where("startAt", ">=", Timestamp.fromDate(weekStart)),
-        where("startAt", "<", Timestamp.fromDate(addDays(weekStart, 7))),
+        where("startAt", ">=", Timestamp.fromDate(start)),
+        where("startAt", "<", Timestamp.fromDate(end)),
       ];
       if (classIds && classIds.length === 0) return [];
       const queries = classIds
