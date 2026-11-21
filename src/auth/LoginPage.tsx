@@ -8,15 +8,19 @@ export function LoginPage() {
   async function login() {
     setError("");
     const provider = new GoogleAuthProvider();
+    const fail = (e: unknown) => {
+      const code = (e as { code?: string }).code ?? "unknown";
+      setError(`로그인하지 못했습니다. 잠시 후 다시 시도해 주세요. (${code})`);
+    };
     try {
       await signInWithPopup(auth, provider);
     } catch (e) {
       const code = (e as { code?: string }).code;
       // 홈 화면 앱에서 팝업이 막히면 페이지 이동 방식으로 다시 시도한다.
       if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
-        await signInWithRedirect(auth, provider);
-      } else if (code !== "auth/popup-closed-by-user") {
-        setError("로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        await signInWithRedirect(auth, provider).catch(fail);
+      } else if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+        fail(e);
       }
     }
   }
