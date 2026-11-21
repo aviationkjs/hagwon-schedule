@@ -6,9 +6,17 @@ export function fakeProfile(p: Partial<UserProfile> = {}): UserProfile {
   return { uid: "p1", academyId: "main", role: "parent", name: "학부모1", phone: "01000000003", studentIds: ["s1"], classIds: ["c1"], ...p };
 }
 
-export function FakeAuth({ profile, children }: { profile: UserProfile | null; children: ReactNode }) {
+export function FakeAuth({
+  profile,
+  signedIn = profile !== null,
+  children,
+}: {
+  profile: UserProfile | null;
+  signedIn?: boolean;
+  children: ReactNode;
+}) {
   const value: AuthState = {
-    user: profile ? ({ uid: profile.uid, email: "test@example.com" } as AuthState["user"]) : null,
+    user: signedIn ? ({ uid: profile?.uid ?? "new-user", email: "test@example.com" } as AuthState["user"]) : null,
     profile,
     loading: false,
     refreshProfile: async () => {},
