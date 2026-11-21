@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { canManageSchedule, canSeeAllClasses } from "../auth/roles";
 import { repo, ACADEMY_ID } from "../data";
+import { hhmm } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 import { RequestForm } from "../requests/RequestForm";
 import { AddSessionSheet } from "./AddSessionSheet";
@@ -20,6 +21,8 @@ export function SchedulePage() {
   const [filter, setFilter] = useState<SessionFilter>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState<{ start: Date; end: Date } | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   const meta = useLoad(async () => {
     const [classes, groups] = await Promise.all([repo.listClasses(ACADEMY_ID), repo.listGroups(ACADEMY_ID)]);
@@ -52,16 +55,39 @@ export function SchedulePage() {
     setAdding({ start, end: new Date(start.getTime() + 90 * 60 * 1000) });
   }
 
+  /** 반·그룹·수업을 서버에서 다시 읽는다 (다른 사람이 바꾼 일정 반영). */
+  async function refresh() {
+    setRefreshing(true);
+    try {
+      await Promise.all([meta.reload(), sessions.reload()]);
+      setUpdatedAt(new Date());
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   return (
     <div className="page">
       <div className="row">
         <h2>스케줄</h2>
-        {isAdmin && (
-          <button className="btn primary" onClick={startAdding}>
-            + 수업
+        <div className="row gap">
+          <button
+            className={`btn icon ${refreshing ? "spinning" : ""}`}
+            onClick={refresh}
+            disabled={refreshing}
+            aria-label="새로고침"
+            title={updatedAt ? `새로고침 (마지막 갱신 ${hhmm(updatedAt)})` : "새로고침"}
+          >
+            <RefreshIcon />
           </button>
-        )}
+          {isAdmin && (
+            <button className="btn primary" onClick={startAdding}>
+              + 수업
+            </button>
+          )}
+        </div>
       </div>
+      {updatedAt && <p className="muted small">마지막 갱신 {hhmm(updatedAt)}</p>}
 
       <div className="filters">
         <select aria-label="그룹" value={filter.groupId ?? ""} onChange={(e) => setFilter({ ...filter, groupId: e.target.value || undefined })}>
@@ -141,5 +167,17 @@ export function SchedulePage() {
         />
       )}
     </div>
+  );
+}
+
+/** Lucide refresh-cw (Astryx 아이콘 세트, ISC 라이선스) */
+function RefreshIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M8 16H3v5" />
+    </svg>
   );
 }
