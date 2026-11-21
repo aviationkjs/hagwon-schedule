@@ -29,6 +29,7 @@ export default defineConfig({
   ],
   test: {
     environment: "jsdom",
+    globals: true,
     setupFiles: ["./src/test/setup.ts"],
     // 에뮬레이터가 필요한 테스트(src/data)는 npm run test:emu 에서만 돈다.
     exclude: process.env.FIRESTORE_EMULATOR_HOST
