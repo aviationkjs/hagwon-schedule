@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { repo, ACADEMY_ID, type ClassInfo, type ClassInput } from "../data";
+import { endAfterStart, minEndTime } from "../domain/time";
 import { useLoad } from "../lib/useLoad";
 import { classHue, HUE_LABEL, HUES } from "../schedule/calendar";
 
@@ -212,17 +213,27 @@ function ScheduleMaker({ cls, onClose }: { cls: ClassInfo; onClose: () => void }
           ))}
         </select>
       </label>
-      <div className="row gap">
+      <div className="two-col">
         <label>
           시작
-          <input className="input" type="time" value={start} onChange={(e) => setStart(e.target.value)} />
+          <input
+            className="input"
+            type="time"
+            value={start}
+            onChange={(e) => {
+              if (!e.target.value) return;
+              setEnd(endAfterStart(start, end, e.target.value)); // 수업 길이를 유지해 종료도 옮긴다
+              setStart(e.target.value);
+            }}
+          />
         </label>
         <label>
           종료
-          <input className="input" type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
+          <input className="input" type="time" min={minEndTime(start)} value={end} onChange={(e) => setEnd(e.target.value)} />
         </label>
       </div>
-      <div className="row gap">
+      {end <= start && <p className="error small">종료 시간은 시작({start}) 이후로만 정할 수 있습니다.</p>}
+      <div className="two-col">
         <label>
           시작일
           <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -234,7 +245,7 @@ function ScheduleMaker({ cls, onClose }: { cls: ClassInfo; onClose: () => void }
       </div>
       {msg && <p className="muted">{msg}</p>}
       <div className="row gap">
-        <button className="btn primary" disabled={busy}>
+        <button className="btn primary" disabled={busy || end <= start}>
           만들기
         </button>
         <button type="button" className="btn link" onClick={onClose}>

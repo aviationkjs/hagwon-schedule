@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { repo, ACADEMY_ID, type ClassInfo } from "../data";
+import { endAfterStart, minEndTime } from "../domain/time";
 import { hhmm } from "../lib/format";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -80,13 +81,23 @@ export function AddSessionSheet({ classes, start, end, onClose, onSaved }: Props
           <div className="two-col">
             <label>
               시작
-              <input className="input" type="time" value={from} onChange={(e) => setFrom(e.target.value)} />
+              <input
+                className="input"
+                type="time"
+                value={from}
+                onChange={(e) => {
+                  if (!e.target.value) return;
+                  setTo(endAfterStart(from, to, e.target.value)); // 수업 길이를 유지해 종료도 옮긴다
+                  setFrom(e.target.value);
+                }}
+              />
             </label>
             <label>
               끝
-              <input className="input" type="time" value={to} onChange={(e) => setTo(e.target.value)} />
+              <input className="input" type="time" min={minEndTime(from)} value={to} onChange={(e) => setTo(e.target.value)} />
             </label>
           </div>
+          {to <= from && <p className="error small">끝나는 시간은 시작({from}) 이후로만 정할 수 있습니다.</p>}
           <label>
             반복
             <select value={weeks} onChange={(e) => setWeeks(Number(e.target.value))}>
@@ -99,7 +110,7 @@ export function AddSessionSheet({ classes, start, end, onClose, onSaved }: Props
             </select>
           </label>
           {error && <p className="error">{error}</p>}
-          <button className="btn primary" disabled={busy}>
+          <button className="btn primary" disabled={busy || to <= from}>
             {weeks === 1 ? "수업 추가" : `수업 ${weeks}개 추가`}
           </button>
         </form>
