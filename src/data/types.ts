@@ -46,7 +46,8 @@ export type Student = {
 export type ClassInfo = {
   id: string;
   name: string;
-  teacherId: string; // 강사 uid
+  teacherId: string; // 강사 uid (초대가 연결된 계정)
+  teacherName: string;
   room: string;
   groupIds: string[];
 };
