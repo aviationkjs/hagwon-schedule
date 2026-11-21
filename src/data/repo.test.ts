@@ -8,16 +8,21 @@ import { makeRepo } from "./repo";
 
 const A = "test-academy";
 
-async function adminDb(): Promise<Firestore> {
-  const env = await testEnv();
-  let out!: Firestore;
-  await env.withSecurityRulesDisabled(async (ctx) => {
-    out = ctx.firestore() as unknown as Firestore;
-  });
-  return out;
+/** 보안 규칙을 켠 채로, 실제 앱처럼 로그인한 사용자로 저장소를 쓴다. */
+async function dbAs(uid: string): Promise<Firestore> {
+  return (await testEnv()).authenticatedContext(uid).firestore() as unknown as Firestore;
 }
+const adminDb = () => dbAs("admin1");
 
-beforeEach(async () => (await testEnv()).clearFirestore());
+beforeEach(async () => {
+  const env = await testEnv();
+  await env.clearFirestore();
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore() as unknown as Firestore, "users", "admin1"), {
+      academyId: A, role: "admin", name: "원장", phone: "01000000001", studentIds: [], classIds: [],
+    });
+  });
+});
 afterAll(async () => (await testEnv()).cleanup());
 
 it("createGroup 후 listGroups에 나온다", async () => {
@@ -44,7 +49,7 @@ async function seedRequest(db: Firestore) {
   return repo.createRequest(A, {
     sessionId: "sess1",
     classId: "c1",
-    requesterUid: "p1",
+    requesterUid: "admin1",
     requesterName: "학부모",
     reason: "병원 예약",
     desiredStart: new Date(2026, 10, 24, 16),
@@ -78,7 +83,7 @@ it("동시에 두 번 반영해도 한 번만 적용되고 이력은 하나", as
 it("전화번호 초대는 한 번만 연결된다", async () => {
   const repo = makeRepo(await adminDb());
   await repo.saveInvite(A, { phone: "01012345678", role: "parent", name: "김학부모", studentIds: ["s1"], classIds: ["c1"] });
-  const p = await repo.claimInvite(A, "u1", "01012345678");
+  const p = await makeRepo(await dbAs("u1")).claimInvite(A, "u1", "01012345678");
   expect(p.role).toBe("parent");
-  await expect(repo.claimInvite(A, "u2", "01012345678")).rejects.toThrow("이미");
+  await expect(makeRepo(await dbAs("u2")).claimInvite(A, "u2", "01012345678")).rejects.toThrow("이미");
 });

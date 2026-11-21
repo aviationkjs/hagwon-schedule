@@ -9,7 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:emu": "firebase emulators:exec --only firestore,auth \"vitest run src/data\""
+    "test:emu": "firebase emulators:exec --only firestore,auth \"vitest run src/data --no-file-parallelism\""
   },
   "dependencies": {
     "firebase": "^13.4.0",
