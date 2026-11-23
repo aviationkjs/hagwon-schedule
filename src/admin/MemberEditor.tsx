@@ -6,6 +6,8 @@ import { useAuth } from "../auth/AuthProvider";
 import { ConfirmDelete } from "./ConfirmDelete";
 
 type Draft = { name: string; phone: string; role: Role; studentIds: string[]; classIds: string[] };
+/** 구성원으로 등록하는 역할: 학부모·강사·관리자 (학생은 학생 탭) */
+const MEMBER_ROLES: Role[] = ["parent", "teacher", "admin"];
 const EMPTY: Draft = { name: "", phone: "", role: "parent", studentIds: [], classIds: [] };
 
 /** 구성원 등록: 전화번호로 초대해 두면 그 사람이 Google 로그인 후 번호를 입력해 연결한다. */
@@ -123,7 +125,8 @@ export function MemberEditor() {
           <label>
             역할
             <select value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value as Role })}>
-              {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
+              {/* 학생은 '학생' 탭에서 등록한다. 예전에 학생 역할로 등록한 사람을 고칠 때만 학생이 보인다. */}
+              {(draft.role === "student" ? [...MEMBER_ROLES, "student" as Role] : MEMBER_ROLES).map((r) => (
                 <option key={r} value={r}>{ROLE_LABEL[r]}</option>
               ))}
             </select>

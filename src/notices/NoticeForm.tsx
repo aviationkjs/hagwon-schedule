@@ -8,6 +8,8 @@ type Kind = NoticeTarget["kind"];
 export function NoticeForm({ board, groups, classes, students, onDone }: Props) {
   const { profile } = useAuth();
   const isAdmin = profile!.role === "admin";
+  // 학부모·학생이 쓰는 글은 운영진만 보는 비밀글
+  const isPrivate = profile!.role === "parent" || profile!.role === "student";
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [kind, setKind] = useState<Kind>("all");
@@ -40,15 +42,25 @@ export function NoticeForm({ board, groups, classes, students, onDone }: Props) 
     setBusy(true);
     setError("");
     try {
-      await repo.createNotice(ACADEMY_ID, {
-        board,
-        authorUid: profile!.uid,
-        authorName: profile!.name,
-        title: title.trim(),
-        body: body.trim(),
-        target: t,
-        pinned: isAdmin && pinned,
-      });
+      if (isPrivate) {
+        // 학부모·학생 글은 운영진만 보는 비밀글로 간다
+        await repo.createPrivatePost(ACADEMY_ID, {
+          authorUid: profile!.uid,
+          authorName: profile!.name,
+          title: title.trim(),
+          body: body.trim(),
+        });
+      } else {
+        await repo.createNotice(ACADEMY_ID, {
+          board,
+          authorUid: profile!.uid,
+          authorName: profile!.name,
+          title: title.trim(),
+          body: body.trim(),
+          target: t,
+          pinned: isAdmin && pinned,
+        });
+      }
       onDone();
     } catch (err) {
       setError(err instanceof Error ? err.message : "올리지 못했습니다.");
@@ -59,7 +71,8 @@ export function NoticeForm({ board, groups, classes, students, onDone }: Props) 
 
   return (
     <form className="card stack" onSubmit={submit}>
-      <h3>{board === "공지" ? "공지 쓰기" : "의견 쓰기"}</h3>
+      <h3>{board === "공지" ? "공지 쓰기" : isPrivate ? "운영진에게 글쓰기" : "의견 쓰기"}</h3>
+      {isPrivate && <p className="muted small">강사·관리자만 읽을 수 있습니다.</p>}
       <input className="input" placeholder="제목" aria-label="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
       <textarea className="input" rows={5} placeholder="내용" aria-label="내용" value={body} onChange={(e) => setBody(e.target.value)} />
       {isAdmin && (

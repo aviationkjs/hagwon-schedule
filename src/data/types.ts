@@ -106,5 +106,7 @@ export type Notice = {
   target: NoticeTarget;
   pinned: boolean;
   createdAt: Date;
+  /** 학부모·학생 비밀글 (쓴 사람과 운영진만 봄) */
+  private?: boolean;
 };
 export type NoticeInput = Omit<Notice, "id" | "createdAt">;

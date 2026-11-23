@@ -77,15 +77,29 @@ service cloud.firestore {
 
       match /notices/{id} {
         allow read: if member(a);
+        // 모두가 보는 글: 공지는 관리자, 자유 의견은 관리자·강사. 학부모·학생 글은 private_posts 로 간다.
         allow create: if isAdmin(a)
-          || (member(a)
+          || (isStaff(a)
               && request.resource.data.board == '자유'
               && request.resource.data.authorUid == request.auth.uid
               && request.resource.data.target.kind == 'all'
               && request.resource.data.pinned == false);
-        allow update, delete: if isAdmin(a)
-          || (member(a) && resource.data.board == '자유' && resource.data.authorUid == request.auth.uid
-              && (request.resource == null || request.resource.data.board == '자유'));
+        allow update: if isAdmin(a)
+          || (isStaff(a) && resource.data.board == '자유' && resource.data.authorUid == request.auth.uid
+              && request.resource.data.board == '자유');
+        allow delete: if isAdmin(a)
+          || (member(a) && resource.data.board == '자유' && resource.data.authorUid == request.auth.uid);
+      }
+
+      // 학부모·학생이 쓰는 비밀글: 쓴 사람과 운영진(관리자·강사)만 읽는다.
+      match /private_posts/{id} {
+        allow read: if isStaff(a) || (member(a) && resource.data.authorUid == request.auth.uid);
+        allow create: if member(a)
+          && me().role in ['parent', 'student']
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.keys().hasOnly(['authorUid', 'authorName', 'title', 'body', 'createdAt']);
+        allow update: if false;
+        allow delete: if isAdmin(a) || (member(a) && resource.data.authorUid == request.auth.uid);
       }
 
       match /audit_log/{id} {

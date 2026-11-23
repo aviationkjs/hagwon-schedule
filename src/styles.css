@@ -427,3 +427,4 @@ textarea.input { padding: var(--spacing-2) var(--spacing-3); resize: vertical; }
 .btn.spinning svg { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .btn.spinning svg { animation: none; opacity: 0.5; } }
+.badge.private { background: var(--color-background-purple); color: var(--color-text-purple); margin-left: 0; margin-right: var(--spacing-1); }

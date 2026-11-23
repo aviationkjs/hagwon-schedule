@@ -1,7 +1,7 @@
 // @vitest-environment node
 // 에뮬레이터 필요: npm run test:emu
 import type { Firestore } from "firebase/firestore";
-import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where, Timestamp } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, Timestamp } from "firebase/firestore";
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { afterAll, beforeEach } from "vitest";
 import { testEnv } from "../test/emulator";
@@ -13,6 +13,7 @@ const profiles = {
   teacher1: { academyId: A, role: "teacher", name: "강사", phone: "01000000002", studentIds: [], classIds: ["c1"] },
   parent1: { academyId: A, role: "parent", name: "학부모1", phone: "01000000003", studentIds: ["s1"], classIds: ["c1"] },
   parent2: { academyId: "other", role: "parent", name: "다른학원", phone: "01000000004", studentIds: [], classIds: [] },
+  parent3: { academyId: A, role: "parent", name: "학부모3", phone: "01000000005", studentIds: [], classIds: [] },
 };
 
 async function as(uid: keyof typeof profiles | null): Promise<Firestore> {
@@ -80,11 +81,67 @@ it("남의 이름으로 요청을 만들 수 없다", async () => {
   );
 });
 
-it("학부모는 자유 의견만 쓸 수 있고 공지는 못 쓴다", async () => {
-  const db = await as("parent1");
-  const base = { authorUid: "parent1", authorName: "학부모1", title: "t", body: "b", target: { kind: "all" }, pinned: false };
-  await assertSucceeds(setDoc(doc(db, "academies", A, "notices", "f1"), { ...base, board: "자유" }));
-  await assertFails(setDoc(doc(db, "academies", A, "notices", "f2"), { ...base, board: "공지" }));
+it("학부모는 모두가 보는 게시판 글(공지·자유)을 못 쓰고, 강사는 자유 의견을 쓸 수 있다", async () => {
+  const base = { title: "t", body: "b", target: { kind: "all" }, pinned: false };
+  const parent = await as("parent1");
+  await assertFails(setDoc(doc(parent, "academies", A, "notices", "f1"), { ...base, authorUid: "parent1", authorName: "학부모1", board: "자유" }));
+  await assertFails(setDoc(doc(parent, "academies", A, "notices", "f2"), { ...base, authorUid: "parent1", authorName: "학부모1", board: "공지" }));
+  const teacher = await as("teacher1");
+  await assertSucceeds(setDoc(doc(teacher, "academies", A, "notices", "f3"), { ...base, authorUid: "teacher1", authorName: "강사", board: "자유" }));
+});
+
+describe("학부모 비밀글 (운영진만 보기)", () => {
+  const post = (uid: string) => ({ authorUid: uid, authorName: "x", title: "상담", body: "문의" });
+  const pp = (db: Firestore, id: string) => doc(db, "academies", A, "private_posts", id);
+  const seedPost = async () => {
+    const env = await testEnv();
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(pp(ctx.firestore() as unknown as Firestore, "p1"), post("parent1"));
+    });
+  };
+
+  it("학부모가 쓸 수 있고, 남의 이름으로는 못 쓴다", async () => {
+    const db = await as("parent1");
+    await assertSucceeds(setDoc(pp(db, "new"), post("parent1")));
+    await assertFails(setDoc(pp(db, "fake"), post("parent3")));
+  });
+
+  it("쓴 사람·강사·관리자만 읽고, 다른 학부모는 못 읽는다", async () => {
+    await seedPost();
+    await assertSucceeds(getDoc(pp(await as("parent1"), "p1")));
+    await assertSucceeds(getDoc(pp(await as("teacher1"), "p1")));
+    await assertSucceeds(getDoc(pp(await as("admin1"), "p1")));
+    await assertFails(getDoc(pp(await as("parent3"), "p1")));
+    await assertFails(getDoc(pp(await as("parent2"), "p1"))); // 다른 학원
+  });
+
+  it("학부모는 자기 글만 목록으로 가져올 수 있다", async () => {
+    await seedPost();
+    const db = await as("parent3");
+    const col = collection(db, "academies", A, "private_posts");
+    await assertSucceeds(getDocs(query(col, where("authorUid", "==", "parent3"))));
+    await assertFails(getDocs(col));
+  });
+
+  it("쓴 사람과 관리자만 지울 수 있다", async () => {
+    await seedPost();
+    await assertFails(deleteDoc(pp(await as("parent3"), "p1")));
+    await assertFails(deleteDoc(pp(await as("teacher1"), "p1")));
+    await assertSucceeds(deleteDoc(pp(await as("parent1"), "p1")));
+    await seedPost();
+    await assertSucceeds(deleteDoc(pp(await as("admin1"), "p1")));
+  });
+});
+
+it("공지는 관리자만 지우고, 자유 의견은 쓴 사람도 지울 수 있다", async () => {
+  const env = await testEnv();
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.firestore() as unknown as Firestore;
+    await setDoc(doc(db, "academies", A, "notices", "free1"), { board: "자유", authorUid: "teacher1", title: "t", target: { kind: "all" } });
+  });
+  await assertFails(deleteDoc(doc(await as("teacher1"), "academies", A, "notices", "n1")));
+  await assertSucceeds(deleteDoc(doc(await as("teacher1"), "academies", A, "notices", "free1")));
+  await assertSucceeds(deleteDoc(doc(await as("admin1"), "academies", A, "notices", "n1")));
 });
 
 it("관리자는 요청을 반영할 수 있다", async () => {

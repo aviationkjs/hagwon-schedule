@@ -38,3 +38,9 @@ export function targetLabel(
 export function sortNotices(xs: Notice[]): Notice[] {
   return [...xs].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.createdAt.getTime() - a.createdAt.getTime());
 }
+
+/** 글 삭제: 관리자는 모든 글, 그 밖에는 자기가 쓴 자유 의견·비밀글만 (공지는 관리자만). 보안 규칙과 같다. */
+export function canDeletePost(post: Notice, role: Role, uid: string): boolean {
+  if (role === "admin") return true;
+  return post.board === "자유" && post.authorUid === uid;
+}

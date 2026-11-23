@@ -360,6 +360,44 @@ export function makeRepo(db: Firestore) {
       });
     },
 
+    /** 관리자: 공지·자유 의견 삭제 (자유 의견은 쓴 사람도) */
+    async deleteNotice(a: string, id: string): Promise<void> {
+      await deleteDoc(ref(a, "notices", id));
+    },
+
+    /** 학부모·학생 비밀글: 쓴 사람과 운영진만 본다. */
+    async createPrivatePost(a: string, p: { authorUid: string; authorName: string; title: string; body: string }): Promise<string> {
+      return (await addDoc(col(a, "private_posts"), { ...p, createdAt: serverTimestamp() })).id;
+    },
+
+    /**
+     * 비밀글 목록을 게시판 글 모양으로. authorUid를 주면 그 사람 글만 (학부모·학생은 반드시 넘긴다:
+     * 보안 규칙은 필터가 아니라서 남의 글이 섞일 수 있는 목록 요청은 통째로 거부된다).
+     */
+    async listPrivatePosts(a: string, authorUid?: string): Promise<Notice[]> {
+      const q = authorUid ? query(col(a, "private_posts"), where("authorUid", "==", authorUid)) : col(a, "private_posts");
+      const s = await getDocs(q);
+      return s.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          board: "자유" as const,
+          authorUid: data.authorUid,
+          authorName: data.authorName,
+          title: data.title,
+          body: data.body,
+          target: { kind: "all" as const },
+          pinned: false,
+          private: true,
+          createdAt: data.createdAt ? toDate(data.createdAt) : new Date(),
+        };
+      });
+    },
+
+    async deletePrivatePost(a: string, id: string): Promise<void> {
+      await deleteDoc(ref(a, "private_posts", id));
+    },
+
     async listAuditLog(a: string): Promise<DocumentData[]> {
       const s = await getDocs(query(col(a, "audit_log"), orderBy("at", "desc")));
       return s.docs.map((d) => ({ id: d.id, ...d.data() }));
