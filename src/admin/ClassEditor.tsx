@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { repo, ACADEMY_ID, type ClassInfo, type ClassInput } from "../data";
 import { endAfterStart, minEndTime } from "../domain/time";
 import { useLoad } from "../lib/useLoad";
+import { ConfirmDelete } from "./ConfirmDelete";
 import { classHue, HUE_LABEL, HUES } from "../schedule/calendar";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -23,6 +24,8 @@ export function ClassEditor() {
   const [scheduling, setScheduling] = useState<ClassInfo | null>(null);
   const [error, setError] = useState("");
   const [savedName, setSavedName] = useState("");
+  // 삭제 확인: 반과 그 반 수업 수
+  const [deleting, setDeleting] = useState<{ cls: ClassInfo; sessions: number } | null>(null);
 
   const classes = data.data?.classes ?? [];
   const groups = data.data?.groups ?? [];
@@ -77,10 +80,28 @@ export function ClassEditor() {
               <button className="btn" onClick={() => setScheduling(c)}>
                 매주 반복 수업 넣기
               </button>
+              <button
+                className="btn danger"
+                onClick={async () => setDeleting({ cls: c, sessions: await repo.countClassSessions(ACADEMY_ID, c.id) })}
+              >
+                삭제
+              </button>
             </div>
           </li>
         ))}
       </ul>
+      {deleting && (
+        <ConfirmDelete
+          title="반 삭제"
+          text={`'${deleting.cls.name}' 반과 이 반의 수업 ${deleting.sessions}개를 지웁니다. 학생·학부모·강사 연결에서도 이 반이 빠집니다.`}
+          onCancel={() => setDeleting(null)}
+          onConfirm={async () => {
+            await repo.deleteClass(ACADEMY_ID, deleting.cls.id);
+            setDeleting(null);
+            await data.reload();
+          }}
+        />
+      )}
       {classes.length === 0 && !editing && <p className="muted">아직 반이 없습니다. 반을 만든 뒤 스케줄에서 수업 시간을 넣습니다.</p>}
       {!editing && (
         <button className="btn primary" onClick={() => setEditing({ value: empty() })}>

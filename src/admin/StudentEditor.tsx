@@ -73,7 +73,8 @@ export function StudentEditor() {
               </div>
               {deleting === s.id && (
                 <ConfirmDelete
-                  text={`${s.name} 학생을 지웁니다. 연결된 학부모·학생 계정에서도 빠지고, 그 학부모가 볼 수 있는 반도 다시 계산됩니다. 되돌릴 수 없습니다.`}
+                  title="학생 삭제"
+                  text={`${s.name} 학생을 지웁니다. 연결된 학부모·학생 계정에서도 빠지고, 그 학부모가 볼 수 있는 반도 다시 계산됩니다.`}
                   onCancel={() => setDeleting(null)}
                   onConfirm={async () => {
                     await repo.deleteStudent(ACADEMY_ID, s.id);

@@ -114,7 +114,8 @@ export function NoticeBoard() {
             )}
             {deleting === n.id && (
               <ConfirmDelete
-                text={`'${n.title}' 글을 지웁니다. 되돌릴 수 없습니다.`}
+                title="글 삭제"
+                text={`'${n.title}' 글을 지웁니다.`}
                 onCancel={() => setDeleting(null)}
                 onConfirm={() => remove(n)}
               />

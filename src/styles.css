@@ -428,3 +428,9 @@ textarea.input { padding: var(--spacing-2) var(--spacing-3); resize: vertical; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .btn.spinning svg { animation: none; opacity: 0.5; } }
 .badge.private { background: var(--color-background-purple); color: var(--color-text-purple); margin-left: 0; margin-right: var(--spacing-1); }
+
+/* ── 확인 팝업 ── */
+.modal-backdrop { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: var(--spacing-4); background: var(--color-overlay); }
+.modal { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: var(--spacing-2); padding: var(--spacing-5); border-radius: var(--radius-container); background: var(--color-background-popover); color: var(--color-text-primary); box-shadow: var(--shadow-high); }
+.modal-actions { display: flex; justify-content: flex-end; gap: var(--spacing-2); margin-top: var(--spacing-2); }
+.btn.danger-strong { background: var(--color-error); border-color: var(--color-error); color: var(--color-on-error); }

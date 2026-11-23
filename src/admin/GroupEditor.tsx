@@ -4,6 +4,7 @@ import { DEFAULT_GROUPS, type Group } from "../domain/group";
 import { gradeLabel } from "../domain/grade";
 import { useLoad } from "../lib/useLoad";
 import { validateGroupsForSave } from "./validate";
+import { ConfirmDelete } from "./ConfirmDelete";
 
 const GRADE_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -12,6 +13,19 @@ export function GroupEditor({ onSaved }: { onSaved?: () => void }) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [message, setMessage] = useState<{ kind: "error" | "ok" | "warn"; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState<Group | null>(null);
+
+  /** 그룹을 빼고 바로 저장한다 (남은 그룹이 규칙에 맞을 때만). */
+  async function removeGroup(target: Group) {
+    const next = groups.filter((g) => g.id !== target.id);
+    const result = validateGroupsForSave(next);
+    if (!result.ok) throw new Error(result.error);
+    await repo.saveGroups(ACADEMY_ID, next.map((g) => ({ ...g, name: g.name.trim() })));
+    setGroups(next);
+    setDeleting(null);
+    setMessage({ kind: "ok", text: `'${target.name}' 그룹을 지웠습니다.` });
+    onSaved?.();
+  }
 
   useEffect(() => {
     if (loaded.data) {
@@ -80,11 +94,19 @@ export function GroupEditor({ onSaved }: { onSaved?: () => void }) {
               </select>
             </span>
           )}
-          <button className="btn link danger" onClick={() => setGroups(groups.filter((_, j) => j !== i))}>
+          <button className="btn link danger" onClick={() => setDeleting(g)}>
             삭제
           </button>
         </div>
       ))}
+      {deleting && (
+        <ConfirmDelete
+          title="그룹 삭제"
+          text={`'${deleting.name}' 그룹을 지웁니다. 이 그룹을 대상으로 한 반·공지와 이 그룹으로 수동 지정한 학생은 '그룹 없음'으로 보입니다. 지금까지 고친 다른 그룹 내용도 함께 저장됩니다.`}
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => removeGroup(deleting)}
+        />
+      )}
       <div className="row gap">
         <button
           className="btn"

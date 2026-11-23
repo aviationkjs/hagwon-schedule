@@ -90,10 +90,11 @@ export function MemberEditor() {
             </div>
             {deleting === i.phone && (
               <ConfirmDelete
+                title="구성원 삭제"
                 text={
                   i.claimedBy
-                    ? `${i.name}님을 구성원에서 지웁니다. 연결된 계정은 바로 앱을 쓸 수 없게 됩니다. 되돌릴 수 없습니다.`
-                    : `${i.name}님의 초대를 지웁니다. 되돌릴 수 없습니다.`
+                    ? `${i.name}님을 구성원에서 지웁니다. 연결된 계정은 바로 앱을 쓸 수 없게 됩니다.`
+                    : `${i.name}님의 초대를 지웁니다.`
                 }
                 onCancel={() => setDeleting(null)}
                 onConfirm={async () => {

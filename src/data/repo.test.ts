@@ -127,3 +127,26 @@ it("학생을 지우면 학부모 연결에서도 빠지고 볼 수 있는 반�
   expect(inv).toMatchObject({ studentIds: [s2], classIds: ["c2"] });
   expect(await repo.getProfile("u1")).toMatchObject({ studentIds: [s2], classIds: ["c2"] });
 });
+
+it("반을 지우면 그 반 수업이 지워지고 학생·구성원 연결에서도 빠진다", async () => {
+  const repo = makeRepo(await adminDb());
+  const c1 = await repo.saveClass(A, { name: "수학", teacherId: "admin1", teacherName: "원장", room: "1실", groupIds: [] });
+  const c2 = await repo.saveClass(A, { name: "영어", teacherId: "admin1", teacherName: "원장", room: "2실", groupIds: [] });
+  const cls1 = (await repo.listClasses(A)).find((c) => c.id === c1)!;
+  const cls2 = (await repo.listClasses(A)).find((c) => c.id === c2)!;
+  await repo.createWeeklySessions(A, cls1, { weekday: 1, start: "16:00", end: "17:00", from: new Date(2026, 10, 23), weeks: 3 });
+  await repo.createWeeklySessions(A, cls2, { weekday: 2, start: "16:00", end: "17:00", from: new Date(2026, 10, 23), weeks: 1 });
+  const s = await repo.saveStudent(A, { name: "학생", birthDate: "2014-01-01", overrideGroupId: null, overrideReason: "", classIds: [c1, c2], photoConsent: false });
+  await repo.saveInvite(A, { phone: "01055556666", role: "parent", name: "학부모", studentIds: [s], classIds: [c1, c2] });
+  await makeRepo(await dbAs("u1")).claimInvite(A, "u1", "01055556666");
+
+  const removed = await repo.deleteClass(A, c1);
+
+  expect(removed).toBe(3);
+  expect((await repo.listClasses(A)).map((c) => c.id)).toEqual([c2]);
+  const left = await repo.listSessionsInRange(A, new Date(2026, 10, 1), new Date(2027, 0, 1));
+  expect(left.map((x) => x.classId)).toEqual([c2]);
+  expect((await repo.listStudents(A))[0].classIds).toEqual([c2]);
+  expect((await repo.listInvites(A))[0].classIds).toEqual([c2]);
+  expect(await repo.getProfile("u1")).toMatchObject({ classIds: [c2] });
+});

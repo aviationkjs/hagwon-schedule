@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { ConfirmDelete } from "../admin/ConfirmDelete";
 import type { ClassInfo, Group, Session } from "../data/types";
 import { dateTimeLabel, hhmm } from "../lib/format";
 
@@ -15,18 +16,7 @@ type Props = {
 export function SessionDetail({ session, cls, groups, onClose, onDelete, children }: Props) {
   const groupNames = groups.filter((g) => cls?.groupIds.includes(g.id)).map((g) => g.name);
   const [confirming, setConfirming] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
 
-  async function remove() {
-    setBusy(true);
-    try {
-      await onDelete!();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "삭제하지 못했습니다.");
-      setBusy(false);
-    }
-  }
   return (
     <div className="sheet" role="dialog" aria-label="수업 상세">
       <div className="sheet-head">
@@ -50,25 +40,19 @@ export function SessionDetail({ session, cls, groups, onClose, onDelete, childre
         <dd>{session.status}</dd>
       </dl>
       {children}
-      {onDelete &&
-        (confirming ? (
-          <div className="stack">
-            <p>이 날짜의 수업 하나만 지웁니다. 되돌릴 수 없습니다.</p>
-            <div className="row gap">
-              <button className="btn danger" disabled={busy} onClick={remove}>
-                삭제
-              </button>
-              <button className="btn" onClick={() => setConfirming(false)}>
-                취소
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button className="btn danger" onClick={() => setConfirming(true)}>
-            이 수업 삭제
-          </button>
-        ))}
-      {error && <p className="error">{error}</p>}
+      {onDelete && (
+        <button className="btn danger" onClick={() => setConfirming(true)}>
+          이 수업 삭제
+        </button>
+      )}
+      {confirming && onDelete && (
+        <ConfirmDelete
+          title="수업 삭제"
+          text={`${cls?.name ?? "수업"} · ${dateTimeLabel(session.startAt)} 수업 하나만 지웁니다. 같은 반의 다른 날짜 수업은 남습니다.`}
+          onCancel={() => setConfirming(false)}
+          onConfirm={onDelete}
+        />
+      )}
     </div>
   );
 }

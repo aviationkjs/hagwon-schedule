@@ -173,6 +173,42 @@ export function makeRepo(db: Firestore) {
       return s.docs.map((d) => withId<ClassInfo>(d.id, d.data()));
     },
 
+    /** 반 하나에 걸린 수업 수 (삭제 확인 문구용) */
+    async countClassSessions(a: string, classId: string): Promise<number> {
+      return (await getDocs(query(col(a, "sessions"), where("classId", "==", classId)))).size;
+    },
+
+    /**
+     * 반 삭제: 반과 그 반의 모든 수업을 지우고, 학생·구성원(학부모·강사)·연결된 계정의 반 목록에서 뺀다.
+     * 지운 수업 수를 돌려준다. 변경 요청 기록은 남는다.
+     */
+    async deleteClass(a: string, classId: string): Promise<number> {
+      const [sessions, students, invites] = await Promise.all([
+        getDocs(query(col(a, "sessions"), where("classId", "==", classId))),
+        this.listStudents(a),
+        this.listInvites(a),
+      ]);
+      const ops: Array<(b: ReturnType<typeof writeBatch>) => void> = [];
+      ops.push((b) => b.delete(ref(a, "classes", classId)));
+      sessions.docs.forEach((d) => ops.push((b) => b.delete(d.ref)));
+      for (const st of students.filter((x) => x.classIds.includes(classId))) {
+        const classIds = st.classIds.filter((id) => id !== classId);
+        ops.push((b) => b.update(ref(a, "students", st.id), { classIds }));
+      }
+      for (const inv of invites.filter((i) => i.classIds.includes(classId))) {
+        const classIds = inv.classIds.filter((id) => id !== classId);
+        ops.push((b) => b.update(ref(a, "invites", inv.phone), { classIds }));
+        if (inv.claimedBy) ops.push((b) => b.update(doc(db, "users", inv.claimedBy!), { classIds }));
+      }
+      // Firestore 한 번에 최대 500건: 400건씩 나눠 보낸다
+      for (const part of chunks(ops, 400)) {
+        const batch = writeBatch(db);
+        part.forEach((op) => op(batch));
+        await batch.commit();
+      }
+      return sessions.size;
+    },
+
     async saveStudent(a: string, st: Omit<Student, "id">, id?: string): Promise<string> {
       if (id) {
         await setDoc(ref(a, "students", id), st);
